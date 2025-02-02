@@ -5,7 +5,7 @@ import { Loader2, Pause, Play, SkipForward } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '~/components/ui/button'
 
-const BACKGROUNDS = ['autumn.jpg', 'waterfall.jpg', 'mountains.jpg', 'bow-river.jpg'] as const
+const BACKGROUNDS = ['autumn.webp', 'waterfall.webp', 'mountains.webp', 'bow-river.webp'] as const
 type Background = (typeof BACKGROUNDS)[number]
 
 const MUSIC = [
@@ -24,7 +24,7 @@ const ThemeSelector = dynamic(() => import('~/components/theme-selector'), {
 })
 
 export default function Home() {
-    const [background, setBackground] = useState<Background>('autumn.jpg')
+    const [background, setBackground] = useState<Background>('autumn.webp')
     const [music, setMusic] = useState<Music>('a-cozy-day.mp3')
 
     const audio = useRef<HTMLAudioElement>()
