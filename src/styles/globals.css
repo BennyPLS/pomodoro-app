@@ -2,9 +2,13 @@
 
 @plugin 'tailwindcss-animate';
 
+/* Custom tailwind 4 at Rules  */
+/*noinspection CssInvalidAtRule*/
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
+    /* Variable provided for NextJS */
+    /*noinspection CssUnresolvedCustomProperty*/
     --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
