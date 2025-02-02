@@ -1,8 +1,8 @@
 'use client'
 import { useTheme } from 'next-themes'
 import { Button } from '~/components/ui/button'
-import { LucideProps, Moon, Sun, SunMoon } from 'lucide-react'
-import { ForwardRefExoticComponent, RefAttributes } from 'react'
+import { type LucideProps, Moon, Sun, SunMoon } from 'lucide-react'
+import { type ForwardRefExoticComponent, type RefAttributes } from 'react'
 
 type Icon = ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>
 

@@ -118,13 +118,7 @@ export function Timer() {
         } else {
             setTimerBasedOnMode()
         }
-    }, [stopTimer, mode, setTimerTime, startTimer])
-
-    useEffect(() => {
-        return () => {
-            stopTimer()
-        }
-    }, [])
+    }, [stopTimer, mode, setTimerTime, startTimer, setTimerBasedOnMode])
 
     return (
         <div className="flex flex-col items-center justify-center gap-2">
