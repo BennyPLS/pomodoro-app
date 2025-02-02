@@ -5,9 +5,9 @@ import { Button } from '~/components/ui/button'
 const NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reverse()
 type TIME = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
-const getNumber = (ref: HTMLDivElement) => {
+const getNumber = (ref: HTMLDivElement): TIME => {
     const actualTop = parseInt(ref.style.top?.replace('px', '') ?? '0')
-    return actualTop === 0 ? 9 : actualTop / 128 + 9
+    return actualTop === 0 ? 9 : ((actualTop / 128 + 9) as TIME)
 }
 
 const advanceNumber = (ref: HTMLDivElement): number => {
@@ -30,8 +30,18 @@ const ORDER = [25, 5, 25, 5, 25, 5, 25, 5, 30]
 
 type TimerMode = 'infinite' | 'individually'
 
+type IndividualMode = 'work' | 'break' | 'longBreak'
+const MODE_TIMES: Record<IndividualMode, number> = {
+    work: 25,
+    break: 5,
+    longBreak: 30,
+}
+
+const FINISH_AUDIO = new Audio('/click.mp3')
+
 export function Timer() {
     const [mode, setMode] = useState<TimerMode>('infinite')
+    const [individualMode, setIndividualMode] = useState<IndividualMode>('work')
 
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     const orderRef = useRef<number>(0)
@@ -55,21 +65,26 @@ export function Timer() {
         [secondsRef, secondsTensRef, minutesRef, minutesTensRef]
     )
 
-    useEffect(() => {
-        if (mode === 'infinite') {
-            orderRef.current = 0
-            setTimerTime(ORDER[0]!, 0)
-        } else {
-            setTimerTime(25, 0)
-        }
-    }, [mode, setTimerTime])
-
     const stopTimer = useCallback(() => {
         if (timeoutRef.current) {
             clearInterval(timeoutRef.current)
             timeoutRef.current = null
         }
     }, [timeoutRef])
+
+    const setTimerBasedOnMode = useCallback(() => {
+        setTimerTime(MODE_TIMES[individualMode], 0)
+    }, [setTimerTime, individualMode])
+
+    useEffect(() => {
+        stopTimer()
+        if (mode === 'infinite') {
+            orderRef.current = 0
+            setTimerTime(ORDER[0]!, 0)
+        } else {
+            setTimerBasedOnMode()
+        }
+    }, [mode, setTimerBasedOnMode, setTimerTime, stopTimer])
 
     // error ignored for dependency cycle
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -80,14 +95,25 @@ export function Timer() {
 
     const advanceTimer = useCallback(() => {
         const newSecond = advanceNumber(secondsRef.current!)
+        console.log('second')
         if (newSecond !== 0) return
+
         const newTenSecond = advanceNumber(secondsTensRef.current!)
+        console.log('ten second')
         if (newTenSecond !== 0) return
+
         const newMinute = advanceNumber(minutesRef.current!)
+        setTime(secondsTensRef.current!, 5)
+        console.log('minute')
+
         if (newMinute !== 0) return
+
         const newTenMinute = advanceNumber(minutesTensRef.current!)
+        console.log('ten minute')
+
         if (newTenMinute !== 0) return
 
+        void FINISH_AUDIO.play()
         stopTimer()
 
         if (mode === 'infinite') {
@@ -96,102 +122,99 @@ export function Timer() {
             setTimerTime(orderTime, 0)
             startTimer()
         } else {
-            alert('Time out!')
+            setTimerBasedOnMode()
         }
     }, [stopTimer, mode, setTimerTime, startTimer])
+
+    useEffect(() => {
+        return () => {
+            stopTimer()
+        }
+    }, [])
 
     return (
         <div className="flex flex-col items-center justify-center gap-2">
             <div className="flex gap-4">
-                <Button onClick={() => setMode('infinite')}>Infinite</Button>
-                <Button onClick={() => setMode('individually')}>Individually</Button>
+                <Button onClick={() => setMode('infinite')}>Infinito</Button>
+                <Button onClick={() => setMode('individually')}>Individual</Button>
             </div>
             <div className="flex gap-4 data-[mode='infinite']:hidden" data-mode={mode}>
-                <Button
-                    onClick={() => {
-                        stopTimer()
-                        setTimerTime(25, 0)
-                    }}
-                >
-                    Work Time
-                </Button>
-                <Button
-                    onClick={() => {
-                        stopTimer()
-                        setTimerTime(5, 0)
-                    }}
-                >
-                    Break Time
-                </Button>
-                <Button
-                    onClick={() => {
-                        stopTimer()
-                        setTimerTime(30, 0)
-                    }}
-                >
-                    Long Break Time
-                </Button>
+                <Button onClick={() => setIndividualMode('work')}>Trabajo</Button>
+                <Button onClick={() => setIndividualMode('break')}>Descanso</Button>
+                <Button onClick={() => setIndividualMode('longBreak')}>Descanso Largo</Button>
             </div>
-            <div className="relative flex h-50 overflow-hidden py-10 text-center text-9xl">
-                <div className="to-background/0 from-background absolute top-0 z-50 h-10 w-full bg-linear-to-b" />
-                <div className="relative h-30 w-20">
-                    <div
-                        className="absolute left-0 flex flex-col gap-2 transition-all duration-300 ease-in-out"
-                        ref={minutesTensRef}
-                        style={{ top: '-896px' }}
-                    >
-                        {NUMBERS.map((number) => (
-                            <span className="z-10 flex h-30 w-20 items-center justify-center" key={`1-${number}`}>
-                                {number}
-                            </span>
-                        ))}
+            <div className="bg-background rounded-lg p-4">
+                <div className="relative flex h-50 overflow-hidden py-10 text-center text-9xl">
+                    <div className="to-background/0 from-background absolute top-0 z-50 h-10 w-full bg-linear-to-b" />
+                    <div className="relative h-30 w-20">
+                        <div
+                            className="absolute left-0 flex flex-col gap-2 transition-all duration-300 ease-in-out"
+                            ref={minutesTensRef}
+                            style={{ top: '0px' }}
+                        >
+                            {NUMBERS.map((number) => (
+                                <span className="z-10 flex h-30 w-20 items-center justify-center" key={`1-${number}`}>
+                                    {number}
+                                </span>
+                            ))}
+                        </div>
                     </div>
-                </div>
-                <div className="relative h-30 w-20">
-                    <div
-                        className="absolute left-0 flex flex-col gap-2 transition-all duration-300 ease-in-out"
-                        ref={minutesRef}
-                        style={{ top: '-512px' }}
-                    >
-                        {NUMBERS.map((number) => (
-                            <span className="z-10 flex h-30 w-20 items-center justify-center" key={`1-${number}`}>
-                                {number}
-                            </span>
-                        ))}
+                    <div className="relative h-30 w-20">
+                        <div
+                            className="absolute left-0 flex flex-col gap-2 transition-all duration-300 ease-in-out"
+                            ref={minutesRef}
+                            style={{ top: '0px' }}
+                        >
+                            {NUMBERS.map((number) => (
+                                <span className="z-10 flex h-30 w-20 items-center justify-center" key={`1-${number}`}>
+                                    {number}
+                                </span>
+                            ))}
+                        </div>
                     </div>
-                </div>
-                <div className="flex items-center justify-center">:</div>
-                <div className="relative h-30 w-20">
-                    <div
-                        className="absolute left-0 flex flex-col gap-2 transition-all duration-300 ease-in-out"
-                        ref={secondsTensRef}
-                        style={{ top: '-1152px' }}
-                    >
-                        {NUMBERS.map((number) => (
-                            <span className="z-10 flex h-30 w-20 items-center justify-center" key={`1-${number}`}>
-                                {number}
-                            </span>
-                        ))}
+                    <div className="flex items-center justify-center">:</div>
+                    <div className="relative h-30 w-20">
+                        <div
+                            className="absolute left-0 flex flex-col gap-2 transition-all duration-300 ease-in-out"
+                            ref={secondsTensRef}
+                            style={{ top: '0px' }}
+                        >
+                            {NUMBERS.map((number) => (
+                                <span className="z-10 flex h-30 w-20 items-center justify-center" key={`1-${number}`}>
+                                    {number}
+                                </span>
+                            ))}
+                        </div>
                     </div>
-                </div>
-                <div className="relative h-30 w-20">
-                    <div
-                        className="absolute left-0 flex flex-col gap-2 transition-all duration-300 ease-in-out"
-                        ref={secondsRef}
-                        style={{ top: '-1152px' }}
-                    >
-                        {NUMBERS.map((number) => (
-                            <span className="z-10 flex h-30 w-20 items-center justify-center" key={`1-${number}`}>
-                                {number}
-                            </span>
-                        ))}
+                    <div className="relative h-30 w-20">
+                        <div
+                            className="absolute left-0 flex flex-col gap-2 transition-all duration-300 ease-in-out"
+                            ref={secondsRef}
+                            style={{ top: '0px' }}
+                        >
+                            {NUMBERS.map((number) => (
+                                <span className="z-10 flex h-30 w-20 items-center justify-center" key={`1-${number}`}>
+                                    {number}
+                                </span>
+                            ))}
+                        </div>
                     </div>
+                    <div className="from-background/0 to-background absolute bottom-0 z-50 h-10 w-full bg-linear-to-b" />
                 </div>
-                <div className="from-background/0 to-background absolute bottom-0 z-50 h-10 w-full bg-linear-to-b" />
             </div>
             <div className="flex gap-4">
-                <Button onClick={startTimer}>Start</Button>
-                <Button onClick={stopTimer}>Stop</Button>
+                <Button onClick={startTimer}>Comenzar</Button>
+                <Button onClick={stopTimer}>Parar</Button>
+                <Button
+                    data-mode={mode}
+                    className="data-[mode='infinite']:hidden"
+                    onClick={() => {
+                        stopTimer()
+                        setTimerBasedOnMode()
+                    }}
+                >
+                    Reiniciar
+                </Button>
             </div>
         </div>
     )
