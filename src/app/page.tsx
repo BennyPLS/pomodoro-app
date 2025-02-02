@@ -5,7 +5,6 @@ import { Loader2, Pause, Play, SkipForward } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '~/components/ui/button'
 
-
 const BACKGROUNDS = ['autumn.jpg', 'waterfall.jpg', 'mountains.jpg', 'bow-river.jpg'] as const
 type Background = (typeof BACKGROUNDS)[number]
 
@@ -28,7 +27,11 @@ export default function Home() {
     const [background, setBackground] = useState<Background>('autumn.jpg')
     const [music, setMusic] = useState<Music>('a-cozy-day.mp3')
 
-    const audio = useRef<HTMLAudioElement>(new Audio(`/music/${music}`))
+    const audio = useRef<HTMLAudioElement>()
+
+    useEffect(() => {
+        audio.current = new Audio(`/music/${music}`)
+    }, [])
 
     const nextBackground = useCallback(() => {
         const nextBackground = BACKGROUNDS[(BACKGROUNDS.indexOf(background) + 1) % BACKGROUNDS.length]!
@@ -37,25 +40,25 @@ export default function Home() {
 
     const nextMusic = useCallback(() => {
         const nextMusic = MUSIC[(MUSIC.indexOf(music) + 1) % MUSIC.length]!
-        audio.current.src = `/music/${nextMusic}`
+        audio.current!.src = `/music/${nextMusic}`
         playMusic()
         setMusic(nextMusic)
     }, [music])
 
     const playMusic = () => {
-        void audio.current.play()
+        void audio.current!.play()
     }
 
     const pauseMusic = () => {
-        void audio.current.pause()
+        void audio.current!.pause()
     }
 
     useEffect(() => {
         const currAudio = audio.current
-        currAudio.addEventListener('ended', nextMusic)
+        currAudio!.addEventListener('ended', nextMusic)
 
         return () => {
-            currAudio.removeEventListener('ended', nextMusic)
+            currAudio!.removeEventListener('ended', nextMusic)
         }
     }, [music, nextMusic])
 

@@ -35,7 +35,11 @@ const MODE_TIMES: Record<IndividualMode, number> = {
 export function Timer() {
     const [mode, setMode] = useState<TimerMode>('infinite')
     const [individualMode, setIndividualMode] = useState<IndividualMode>('work')
-    const finishAudio = useRef<HTMLAudioElement>(new Audio('/finish.mp3'))
+    const finishAudio = useRef<HTMLAudioElement>()
+
+    useEffect(() => {
+        finishAudio.current = new Audio('/click.mp3')
+    }, [])
 
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     const orderRef = useRef<number>(0)
@@ -107,7 +111,7 @@ export function Timer() {
 
         if (newTenMinute !== 0) return
 
-        void finishAudio.current.play()
+        void finishAudio.current!.play()
         stopTimer()
 
         if (mode === 'infinite') {
