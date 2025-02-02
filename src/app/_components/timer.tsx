@@ -5,11 +5,6 @@ import { Button } from '~/components/ui/button'
 const NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reverse()
 type TIME = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
-const getNumber = (ref: HTMLDivElement): TIME => {
-    const actualTop = parseInt(ref.style.top?.replace('px', '') ?? '0')
-    return actualTop === 0 ? 9 : ((actualTop / 128 + 9) as TIME)
-}
-
 const advanceNumber = (ref: HTMLDivElement): number => {
     const actualTop = parseInt(ref.style.top?.replace('px', '') ?? '0')
 
@@ -37,11 +32,10 @@ const MODE_TIMES: Record<IndividualMode, number> = {
     longBreak: 30,
 }
 
-const FINISH_AUDIO = new Audio('/click.mp3')
-
 export function Timer() {
     const [mode, setMode] = useState<TimerMode>('infinite')
     const [individualMode, setIndividualMode] = useState<IndividualMode>('work')
+    const finishAudio = useRef<HTMLAudioElement>(new Audio('/finish.mp3'))
 
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     const orderRef = useRef<number>(0)
@@ -113,7 +107,7 @@ export function Timer() {
 
         if (newTenMinute !== 0) return
 
-        void FINISH_AUDIO.play()
+        void finishAudio.current.play()
         stopTimer()
 
         if (mode === 'infinite') {

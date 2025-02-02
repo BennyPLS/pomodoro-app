@@ -5,6 +5,7 @@ import { Loader2, Pause, Play, SkipForward } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '~/components/ui/button'
 
+
 const BACKGROUNDS = ['autumn.jpg', 'waterfall.jpg', 'mountains.jpg', 'bow-river.jpg'] as const
 type Background = (typeof BACKGROUNDS)[number]
 
