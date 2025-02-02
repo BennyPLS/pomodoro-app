@@ -72,7 +72,7 @@ export default function Home() {
 
     return (
         <div
-            className="background-transition h-full w-full bg-cover bg-center"
+            className="flex flex-col background-transition h-screen w-screen bg-cover bg-center"
             style={{ backgroundImage: `url(/backgrounds/${background})` }}
         >
             <nav className="bg-background flex h-14 w-screen items-center justify-between gap-4 p-4">
@@ -94,7 +94,7 @@ export default function Home() {
                     <ThemeSelector />
                 </div>
             </nav>
-            <main className="flex h-screen w-screen items-center justify-center gap-4">
+            <main className="flex grow items-center justify-center gap-4">
                 <Timer />
             </main>
         </div>
