@@ -6,6 +6,8 @@ import { type Metadata } from 'next'
 import { TRPCReactProvider } from '~/trpc/react'
 import { type ReactNode } from 'react'
 import ThemeProvider from '~/providers/theme-provider'
+import { Toaster } from '~/components/ui/sonner'
+import Script from 'next/script'
 
 export const metadata: Metadata = {
     title: 'Pomodoro Timer',
@@ -15,8 +17,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
     return (
-        <html suppressHydrationWarning lang="en" className={`${GeistSans.variable}`}>
+        <html suppressHydrationWarning lang="es" className={`${GeistSans.variable}`}>
+            <head>
+                <Script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js" />
+            </head>
             <body>
+                <Toaster richColors={true} />
                 <TRPCReactProvider>
                     <ThemeProvider>{children}</ThemeProvider>
                 </TRPCReactProvider>
