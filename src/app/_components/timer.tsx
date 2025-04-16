@@ -18,7 +18,7 @@ const MODE_TIMES_SECONDS: Record<IndividualMode, number> = {
     longBreak: 30 * 60,
 }
 
-const INTERVAL_MS = 0
+const INTERVAL_MS = 1000
 
 // --- Helper Functions ---
 
