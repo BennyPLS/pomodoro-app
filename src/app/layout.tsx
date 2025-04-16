@@ -8,6 +8,7 @@ import { type ReactNode } from 'react'
 import ThemeProvider from '~/providers/theme-provider'
 import { Toaster } from '~/components/ui/sonner'
 import Script from 'next/script'
+import FirstTimeVisitScript from '~/scripts/first-time-visit'
 
 export const metadata: Metadata = {
     title: 'Pomodoro Timer',
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <html suppressHydrationWarning lang="es" className={`${GeistSans.variable}`}>
             <head>
                 <Script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js" />
+                <FirstTimeVisitScript />
             </head>
             <body>
                 <Toaster richColors={true} />

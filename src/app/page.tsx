@@ -44,13 +44,13 @@ function TopNavBar({ nextMusic, playMusic, pauseMusic, actualMusic, progress, du
                 </div>
                 <div className="text-center">{actualMusic?.title ?? 'No Selected'}</div>
                 {/* Progress slider */}
-                <div className="w-full px-4">
+                <div className="w-full px-4 flex sm:justify-center">
                     <Slider
                         value={[progress]}
                         max={duration}
                         step={0.1}
                         onValueChange={(value) => seek(value[0]!)}
-                        className="w-full"
+                        className="sm:w-56"
                     />
                 </div>
             </div>
@@ -66,27 +66,7 @@ function TopNavBar({ nextMusic, playMusic, pauseMusic, actualMusic, progress, du
 }
 
 export default function Home() {
-    const allMusic = useLiveQuery(() => {
-        // First, ensure all music items have an order value
-        return db.music.toArray().then((items) => {
-            // Check if any items don't have an order
-            const hasUndefinedOrder = items.some((item) => item.order === undefined)
-
-            if (hasUndefinedOrder) {
-                // If there are items without order, assign them one
-                const itemsWithOrder = items.map((item) => ({
-                    ...item,
-                    order: item.order ?? 0,
-                }))
-
-                // Sort manually by order
-                return itemsWithOrder.sort((a, b) => a.order - b.order)
-            } else {
-                // If all items have an order, use the index
-                return db.music.orderBy('order').toArray()
-            }
-        })
-    })
+    const allMusic = useLiveQuery(() =>  db.music.toArray())
 
     const [music, setMusic] = useState<Music | undefined>(allMusic?.[0])
     const [currentMusicIndex, setCurrentMusicIndex] = useState(allMusic?.length ? 0 : -1)
@@ -192,7 +172,7 @@ export default function Home() {
             <main className="flex grow items-center justify-center gap-4">
                 <Timer />
             </main>
-            <div className="flex items-center gap-2 border-t p-4">
+            <div className="flex items-center gap-2 border-t p-4 sm:justify-center">
                 <Button size="icon">
                     {volume > 0.66 ? (
                         <Volume2 />
@@ -204,7 +184,13 @@ export default function Home() {
                         <VolumeX />
                     )}
                 </Button>
-                <Slider value={[volume]} max={1} step={0.01} onValueChange={(value) => handleVolumeChange(value[0]!)} />
+                <Slider
+                    value={[volume]}
+                    max={1}
+                    step={0.01}
+                    onValueChange={(value) => handleVolumeChange(value[0]!)}
+                    className="sm:w-56"
+                />
             </div>
         </div>
     )

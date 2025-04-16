@@ -1,12 +1,12 @@
 'use client'
 import { z } from 'zod'
-import db, { type Music } from '~/lib/db'
+import db, { insertDefaultSongs, type Music } from '~/lib/db'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { ArrowDown, ArrowUp, Pause, Play, Trash2, Undo2, Volume, Volume1, Volume2, VolumeX } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Slider } from '~/components/ui/slider'
 import { useAudioPlayer } from '~/hooks/use-audio-player'
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { Spinner } from '~/components/ui/spinner'
 import { AddMusicDialog } from '~/app/settings/add-music-dialog'
 
@@ -40,27 +40,7 @@ function TopNavBar() {
 }
 
 export default function MusicSettingsPage() {
-    const music = useLiveQuery(() => {
-        // First, ensure all music items have an order value
-        return db.music.toArray().then((items) => {
-            // Check if any items don't have an order
-            const hasUndefinedOrder = items.some((item) => item.order === undefined)
-
-            if (hasUndefinedOrder) {
-                // If there are items without order, assign them one
-                const itemsWithOrder = items.map((item) => ({
-                    ...item,
-                    order: item.order ?? 0,
-                }))
-
-                // Sort manually by order
-                return itemsWithOrder.sort((a, b) => a.order - b.order)
-            } else {
-                // If all items have an order, use the index
-                return db.music.orderBy('order').toArray()
-            }
-        })
-    })
+    const music = useLiveQuery(() => db.music.toArray())
 
     const isLoading = useMemo(() => music === undefined, [music])
 

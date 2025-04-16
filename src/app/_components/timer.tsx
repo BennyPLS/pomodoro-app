@@ -9,7 +9,7 @@ const DIGIT_HEIGHT_PX = 128 // Matches h-30 (120px) + gap-2 (8px) in CSS
 const NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reverse()
 type TIME_DIGIT = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
-const ORDER_SECONDS = [25 * 60, 5 * 60, 25 * 60, 5 * 60, 25 * 60, 5 * 60, 25 * 60, 5 * 60, 30 * 60] // Times in seconds
+const ORDER_SECONDS = [25 * 60, 5 * 60, 25 * 60, 5 * 60, 25 * 60, 5 * 60, 25 * 60, 30 * 60] // Times in seconds
 type TimerMode = 'infinite' | 'individually'
 type IndividualMode = 'work' | 'break' | 'longBreak'
 const MODE_TIMES_SECONDS: Record<IndividualMode, number> = {
@@ -18,7 +18,7 @@ const MODE_TIMES_SECONDS: Record<IndividualMode, number> = {
     longBreak: 30 * 60,
 }
 
-const INTERVAL_MS = 1000
+const INTERVAL_MS = 0
 
 // --- Helper Functions ---
 
