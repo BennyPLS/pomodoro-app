@@ -55,7 +55,18 @@ export function AddMusicDialog() {
 
     const onSubmit = async (data: NewMusicForm) => {
         try {
-            const title = await db.music.add(data)
+            // Get the highest order value
+            const allMusic = await db.music.toArray()
+            const highestOrder = allMusic.length > 0 
+                ? Math.max(...allMusic.map(m => m.order ?? 0)) 
+                : -1
+
+            // Add the new music with the next order value
+            const musicData = {
+                ...data,
+                order: highestOrder + 1
+            }
+            const title = await db.music.add(musicData)
 
             toast.success(`Se ha subido la musica: ${title}`)
             form.reset()
