@@ -2,12 +2,13 @@
 import { Timer } from '~/app/_components/timer'
 import dynamic from 'next/dynamic'
 import { Loader2, Pause, Play, Settings, SkipForward, Volume, Volume1, Volume2, VolumeX } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect } from 'react'
 import { Button } from '~/components/ui/button'
 import Link from 'next/link'
 import { useLiveQuery } from 'dexie-react-hooks'
 import db, { type Music } from '~/lib/db'
 import { Slider } from '~/components/ui/slider'
+import { useMusicPlayerStore } from '~/store/music-player-store'
 
 const ThemeSelector = dynamic(() => import('~/components/theme-selector'), {
     ssr: false,
@@ -66,97 +67,33 @@ function TopNavBar({ nextMusic, playMusic, pauseMusic, actualMusic, progress, du
 }
 
 export default function Home() {
-    const allMusic = useLiveQuery(() =>  db.music.toArray())
+    const allMusic = useLiveQuery(() => db.music.toArray())
 
-    const [music, setMusic] = useState<Music | undefined>(allMusic?.[0])
-    const [currentMusicIndex, setCurrentMusicIndex] = useState(allMusic?.length ? 0 : -1)
-    const [volume, setVolume] = useState(1)
-    const [progress, setProgress] = useState(0)
-    const [duration, setDuration] = useState(0)
-    const audio = useRef<HTMLAudioElement>(undefined)
+    // Get state and actions from the music player store
+    const {
+        music,
+        volume,
+        progress,
+        duration,
+        nextMusic: nextMusicAction,
+        playMusic,
+        pauseMusic,
+        handleVolumeChange,
+        handleSeek,
+        initializeWithMusic
+    } = useMusicPlayerStore()
 
+    // Initialize the music player with the music from the database
     useEffect(() => {
+        initializeWithMusic(allMusic)
+    }, [allMusic, initializeWithMusic])
+
+    // Create a wrapper for nextMusic that passes the allMusic array
+    const nextMusic = () => {
         if (allMusic?.length) {
-            setCurrentMusicIndex(0)
-            setMusic(allMusic[0])
+            nextMusicAction(allMusic)
         }
-    }, [allMusic])
-
-    useEffect(() => {
-        audio.current = new Audio()
-        const audioElement = audio.current
-
-        // Add event listeners
-        const handleTimeUpdate = () => {
-            setProgress(audioElement.currentTime)
-        }
-
-        const handleDurationChange = () => {
-            setDuration(audioElement.duration)
-        }
-
-        const handleVolumeChange = () => {
-            setVolume(audioElement.volume)
-        }
-
-        audioElement.addEventListener('timeupdate', handleTimeUpdate)
-        audioElement.addEventListener('durationchange', handleDurationChange)
-        audioElement.addEventListener('volumechange', handleVolumeChange)
-
-        return () => {
-            // Remove event listeners
-            audioElement.removeEventListener('timeupdate', handleTimeUpdate)
-            audioElement.removeEventListener('durationchange', handleDurationChange)
-            audioElement.removeEventListener('volumechange', handleVolumeChange)
-
-            audioElement.pause()
-            audio.current = undefined
-        }
-    }, [])
-
-    const nextMusic = useCallback(() => {
-        let wasPlaying = false
-
-        if (!allMusic?.length) return
-        if (audio.current) {
-            if (!audio.current.paused) {
-                audio.current.pause()
-                wasPlaying = true
-            }
-
-            audio.current.currentTime = 0
-        }
-        const nextIndex = (currentMusicIndex + 1) % allMusic.length
-        setCurrentMusicIndex(nextIndex)
-        setMusic(allMusic[nextIndex])
-        if (audio.current && allMusic[nextIndex]) {
-            audio.current.src = URL.createObjectURL(allMusic[nextIndex].blob)
-            if (wasPlaying) void audio.current.play()
-        }
-    }, [allMusic, currentMusicIndex])
-
-    const playMusic = useCallback(() => {
-        if (!audio.current || !music) return
-        if (!audio.current.src) {
-            audio.current.src = URL.createObjectURL(music.blob)
-        }
-        void audio.current.play()
-    }, [music])
-
-    const pauseMusic = useCallback(() => {
-        if (!audio.current) return
-        audio.current.pause()
-    }, [])
-
-    const handleVolumeChange = useCallback((newVolume: number) => {
-        if (!audio.current) return
-        audio.current.volume = newVolume
-    }, [])
-
-    const handleSeek = useCallback((newTime: number) => {
-        if (!audio.current) return
-        audio.current.currentTime = newTime
-    }, [])
+    }
 
     return (
         <div className="flex h-svh w-screen flex-col">

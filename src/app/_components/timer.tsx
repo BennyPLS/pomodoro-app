@@ -1,24 +1,14 @@
 // Timer.tsx (Refactored)
 
 'use client'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { Button } from '~/components/ui/button'
+import { useTimerStore } from '~/store/timer-store'
 
 // --- Constants ---
 const DIGIT_HEIGHT_PX = 128 // Matches h-30 (120px) + gap-2 (8px) in CSS
 const NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reverse()
 type TIME_DIGIT = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-
-const ORDER_SECONDS = [25 * 60, 5 * 60, 25 * 60, 5 * 60, 25 * 60, 5 * 60, 25 * 60, 30 * 60] // Times in seconds
-type TimerMode = 'infinite' | 'individually'
-type IndividualMode = 'work' | 'break' | 'longBreak'
-const MODE_TIMES_SECONDS: Record<IndividualMode, number> = {
-    work: 25 * 60,
-    break: 5 * 60,
-    longBreak: 30 * 60,
-}
-
-const INTERVAL_MS = 1000
 
 // --- Helper Functions ---
 
@@ -51,17 +41,21 @@ const getDigitsFromSeconds = (
 
 // --- Timer Component ---
 export function Timer() {
-    // --- State ---
-    const [mode, setMode] = useState<TimerMode>('infinite')
-    const [individualMode, setIndividualMode] = useState<IndividualMode>('work')
-    const [remainingSeconds, setRemainingSeconds] = useState<number>(ORDER_SECONDS[0] ?? 25 * 60)
-    const [isRunning, setIsRunning] = useState<boolean>(false)
-    const [orderIndex, setOrderIndex] = useState<number>(0)
+    // --- Get state and actions from store ---
+    const { 
+        mode, 
+        individualMode, 
+        remainingSeconds, 
+        isRunning, 
+        setMode: handleSetMode, 
+        setIndividualMode: handleSetIndividualMode,
+        start: handleStart,
+        stop: handleStop,
+        reset: handleReset
+    } = useTimerStore()
 
     // --- Refs ---
     const finishAudio = useRef<HTMLAudioElement | null>(null)
-    const intervalRef = useRef<NodeJS.Timeout | null>(null) // Use ref for interval ID
-
     const minutesTensRef = useRef<HTMLDivElement>(null)
     const minutesRef = useRef<HTMLDivElement>(null)
     const secondsTensRef = useRef<HTMLDivElement>(null)
@@ -70,57 +64,32 @@ export function Timer() {
     // --- Audio Initialization ---
     useEffect(() => {
         finishAudio.current = new Audio('/click.mp3')
-    }, [])
 
-    // --- Timer Interval Effect ---
-    useEffect(() => {
-        if (!isRunning) {
-            if (intervalRef.current) clearInterval(intervalRef.current)
-            intervalRef.current = null
-            return
+        // Play the finish audio when timer completes
+        const handleTimerFinish = () => {
+            finishAudio.current?.play().catch((err) => console.error('Audio play failed:', err))
         }
 
-        // Start new interval
-        intervalRef.current = setInterval(() => {
-            setRemainingSeconds((prevSeconds) => {
-                if (prevSeconds <= 1) {
-                    // Timer finished
-                    finishAudio.current?.play().catch((err) => console.error('Audio play failed:', err))
-
-                    // Stop the timer immediately
-                    if (intervalRef.current) clearInterval(intervalRef.current)
-                    intervalRef.current = null
-                    setIsRunning(false) // Set running state to false
-
-                    // Determine next state based on mode
-                    if (mode === 'infinite') {
-                        const nextIndex = (orderIndex + 1) % ORDER_SECONDS.length
-                        setOrderIndex(nextIndex)
-                        const nextTime = ORDER_SECONDS[nextIndex] ?? 25 * 60
-                        // Set timeout to auto-start next timer after a short delay (optional)
-                        setTimeout(() => {
-                            setRemainingSeconds(nextTime)
-                            setIsRunning(true) // Auto-restart for infinite mode
-                        }, 500) // Small delay before auto-restart
-                        return nextTime // Set state for the next round immediately for visual update
-                    } else {
-                        // Reset to the individual mode time, but don't auto-start
-                        return MODE_TIMES_SECONDS[individualMode]
-                    }
+        // Subscribe to the timer finish event
+        // This is a simplified approach - in a real implementation, we might want to
+        // add a proper event system to the store or use a subscription
+        const originalDecrementSeconds = useTimerStore.getState().decrementSeconds
+        useTimerStore.setState({
+            decrementSeconds: () => {
+                const state = useTimerStore.getState()
+                if (state.remainingSeconds <= 1) {
+                    handleTimerFinish()
                 }
-                // Just decrement
-                return prevSeconds - 1
-            })
-        }, INTERVAL_MS)
+                originalDecrementSeconds()
+            }
+        })
 
-        // Cleanup function
+        // Cleanup
         return () => {
-            if (intervalRef.current) clearInterval(intervalRef.current)
-            intervalRef.current = null
+            // Restore original function
+            useTimerStore.setState({ decrementSeconds: originalDecrementSeconds })
         }
-        // Rerun effect if isRunning changes, or if mode/order/individualMode changes
-        // which might affect the timer end logic.
-    }, [isRunning, mode, orderIndex, individualMode])
+    }, [])
 
     // --- Visual Update Effect ---
     useEffect(() => {
@@ -131,46 +100,7 @@ export function Timer() {
         setDigitReel(secondsRef, su)
     }, [remainingSeconds]) // Update visuals whenever remainingSeconds changes
 
-    // --- Mode Change Effect ---
-    useEffect(() => {
-        setIsRunning(false) // Stop timer when mode changes
-        if (mode === 'infinite') {
-            setOrderIndex(0)
-            setRemainingSeconds(ORDER_SECONDS[0] ?? 25 * 60)
-        } else {
-            setRemainingSeconds(MODE_TIMES_SECONDS[individualMode])
-        }
-    }, [mode, individualMode]) // Rerun when mode or individualMode changes
-
-    // --- Event Handlers ---
-    const handleStart = useCallback(() => {
-        if (!isRunning && remainingSeconds > 0) {
-            setIsRunning(true)
-        }
-    }, [isRunning, remainingSeconds])
-
-    const handleStop = useCallback(() => {
-        setIsRunning(false)
-    }, [])
-
-    const handleReset = useCallback(() => {
-        setIsRunning(false)
-        if (mode === 'infinite') {
-            const resetIndex = 0 // Or keep current orderIndex? User choice. Let's reset.
-            setOrderIndex(resetIndex)
-            setRemainingSeconds(ORDER_SECONDS[resetIndex] ?? 25 * 60)
-        } else {
-            setRemainingSeconds(MODE_TIMES_SECONDS[individualMode])
-        }
-    }, [mode, individualMode])
-
-    const handleSetMode = useCallback((newMode: TimerMode) => {
-        setMode(newMode)
-    }, [])
-
-    const handleSetIndividualMode = useCallback((newIndividualMode: IndividualMode) => {
-        setIndividualMode(newIndividualMode)
-    }, [])
+    // Note: Mode change effect is now handled by the store's setMode and setIndividualMode actions
 
     // --- Accessibility Text ---
     const minutes = Math.floor(remainingSeconds / 60)
