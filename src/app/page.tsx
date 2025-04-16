@@ -1,12 +1,10 @@
 'use client'
 import { Timer } from '~/app/_components/timer'
 import dynamic from 'next/dynamic'
-import { Loader2, Pause, Play, SkipForward } from 'lucide-react'
+import { Loader2, Pause, Play, Settings, SkipForward } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Button } from '~/components/ui/button'
-
-const BACKGROUNDS = ['autumn.webp', 'waterfall.webp', 'mountains.webp', 'bow-river.webp'] as const
-type Background = (typeof BACKGROUNDS)[number]
+import Link from 'next/link'
 
 const MUSIC = [
     'a-cozy-day.mp3',
@@ -16,6 +14,7 @@ const MUSIC = [
     'night-coffee-shop.mp3',
     'sunrise-meditation.mp3',
 ] as const
+
 type Music = (typeof MUSIC)[number]
 
 const ThemeSelector = dynamic(() => import('~/components/theme-selector'), {
@@ -23,77 +22,83 @@ const ThemeSelector = dynamic(() => import('~/components/theme-selector'), {
     loading: () => <Loader2 className="animate-spin" />,
 })
 
+export interface TopNavBarProps {
+    nextMusic: () => void
+    playMusic: () => void
+    pauseMusic: () => void
+}
+
+function TopNavBar({ nextMusic, playMusic, pauseMusic }: TopNavBarProps) {
+    return (
+        <nav className="flex gap-4 border-b p-4">
+            <div className="flex justify-start gap-4">
+                <ThemeSelector />
+            </div>
+            <div className="flex grow justify-center gap-4">
+                <Button size="icon" onClick={playMusic}>
+                    <Play />
+                </Button>
+                <Button size="icon" onClick={pauseMusic}>
+                    <Pause />
+                </Button>
+                <Button size="icon" onClick={nextMusic}>
+                    <SkipForward />
+                </Button>
+            </div>
+            <div className="flex justify-end gap-4">
+                <Button size="icon" asChild>
+                    <Link href="/settings">
+                        <Settings />
+                    </Link>
+                </Button>
+            </div>
+        </nav>
+    )
+}
+
 export default function Home() {
-    const [background, setBackground] = useState<Background>('autumn.webp')
     const [music, setMusic] = useState<Music>('a-cozy-day.mp3')
 
-    const audio = useRef<HTMLAudioElement>()
+    const audio = useRef<HTMLAudioElement>(undefined)
 
     useEffect(() => {
-        audio.current = new Audio(`/music/${music}`)
+        audio.current ??= new Audio()
+        audio.current.preload = 'auto'
     }, [])
 
-    const nextBackground = useCallback(() => {
-        const nextBackground = BACKGROUNDS[(BACKGROUNDS.indexOf(background) + 1) % BACKGROUNDS.length]!
-        setBackground(nextBackground)
-    }, [background])
+    const playMusic = useCallback(() => {
+        if (audio.current) {
+            audio.current.src = `/music/${music}`
+            void audio.current.play()
+        }
+    }, [music])
+
+    const pauseMusic = useCallback(() => {
+        void audio.current?.pause()
+    }, [])
 
     const nextMusic = useCallback(() => {
         const nextMusic = MUSIC[(MUSIC.indexOf(music) + 1) % MUSIC.length]!
-        audio.current!.src = `/music/${nextMusic}`
-        playMusic()
-        setMusic(nextMusic)
-    }, [music])
-
-    const playMusic = () => {
-        void audio.current!.play()
-    }
-
-    const pauseMusic = () => {
-        void audio.current!.pause()
-    }
+        if (audio.current) {
+            setMusic(nextMusic)
+            playMusic()
+        }
+    }, [music, playMusic])
 
     useEffect(() => {
         const currAudio = audio.current
-        currAudio!.addEventListener('ended', nextMusic)
+        currAudio?.addEventListener('ended', nextMusic)
 
         return () => {
-            currAudio!.removeEventListener('ended', nextMusic)
+            currAudio?.removeEventListener('ended', nextMusic)
+            audio.current?.pause()
+            audio.current = undefined
         }
     }, [music, nextMusic])
 
-    useEffect(() => {
-        const timeout = setTimeout(() => {
-            nextBackground()
-        }, 1200000)
-
-        return () => clearTimeout(timeout)
-    }, [nextBackground])
-
     return (
-        <div
-            className="flex flex-col background-transition h-screen w-screen bg-cover bg-center"
-            style={{ backgroundImage: `url(/backgrounds/${background})` }}
-        >
-            <nav className="bg-background flex h-14 w-screen items-center justify-between gap-4 p-4">
-                <div>
-                    <Button onClick={nextBackground}>Siguiente Fondo</Button>
-                </div>
-                <div className="flex gap-4">
-                    <Button size="icon" onClick={playMusic}>
-                        <Play />
-                    </Button>
-                    <Button size="icon" onClick={pauseMusic}>
-                        <Pause />
-                    </Button>
-                    <Button size="icon" onClick={nextMusic}>
-                        <SkipForward />
-                    </Button>
-                </div>
-                <div>
-                    <ThemeSelector />
-                </div>
-            </nav>
+        <div className="flex h-svh w-screen flex-col">
+            <TopNavBar nextMusic={nextMusic} playMusic={playMusic} pauseMusic={pauseMusic} />
             <main className="flex grow items-center justify-center gap-4">
                 <Timer />
             </main>

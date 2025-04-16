@@ -34,7 +34,7 @@ export default function ThemeSelector() {
     }
 
     return (
-        <Button variant="ghost" size="icon" onClick={handleClick}>
+        <Button size="icon" onClick={handleClick}>
             <Icon className="size-8" />
         </Button>
     )
