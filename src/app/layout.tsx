@@ -11,7 +11,6 @@ import FirstTimeVisitScript from '~/scripts/first-time-visit'
 import { env } from '~/env'
 
 export const metadata: Metadata = {
-    title: 'Pomodoro Timer',
     description: 'Simple pomodoro timer',
 }
 
