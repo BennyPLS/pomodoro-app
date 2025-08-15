@@ -3,7 +3,7 @@
 'use client'
 import { useEffect, useRef } from 'react'
 import { Button } from '~/components/ui/button'
-import { useTimerStore } from '~/store/timer-store'
+import { useTimer } from '~/hooks/use-timer'
 
 // --- Constants ---
 const DIGIT_HEIGHT_PX = 128 // Matches h-30 (120px) + gap-2 (8px) in CSS
@@ -41,21 +41,22 @@ const getDigitsFromSeconds = (
 
 // --- Timer Component ---
 export function Timer() {
-    // --- Get state and actions from store ---
-    const { 
-        mode, 
-        individualMode, 
-        remainingSeconds, 
-        isRunning, 
-        setMode: handleSetMode, 
+    // --- Get state and actions from hook ---
+    const {
+        mode,
+        individualMode,
+        remainingSeconds,
+        isRunning,
+        setMode: handleSetMode,
         setIndividualMode: handleSetIndividualMode,
         start: handleStart,
         stop: handleStop,
-        reset: handleReset
-    } = useTimerStore()
+        reset: handleReset,
+    } = useTimer()
 
     // --- Refs ---
     const finishAudio = useRef<HTMLAudioElement | null>(null)
+    const prevSecondsRef = useRef<number | null>(null)
     const minutesTensRef = useRef<HTMLDivElement>(null)
     const minutesRef = useRef<HTMLDivElement>(null)
     const secondsTensRef = useRef<HTMLDivElement>(null)
@@ -64,32 +65,17 @@ export function Timer() {
     // --- Audio Initialization ---
     useEffect(() => {
         finishAudio.current = new Audio('/click.mp3')
+    }, [])
 
-        // Play the finish audio when timer completes
-        const handleTimerFinish = () => {
+    // --- Play sound when finishing a cycle ---
+    // Detect transition away from 1 second (finish moment) to any other value.
+    useEffect(() => {
+        const prev = prevSecondsRef.current
+        if (prev === 1 && remainingSeconds !== 1) {
             finishAudio.current?.play().catch((err) => console.error('Audio play failed:', err))
         }
-
-        // Subscribe to the timer finish event
-        // This is a simplified approach - in a real implementation, we might want to
-        // add a proper event system to the store or use a subscription
-        const originalDecrementSeconds = useTimerStore.getState().decrementSeconds
-        useTimerStore.setState({
-            decrementSeconds: () => {
-                const state = useTimerStore.getState()
-                if (state.remainingSeconds <= 1) {
-                    handleTimerFinish()
-                }
-                originalDecrementSeconds()
-            }
-        })
-
-        // Cleanup
-        return () => {
-            // Restore original function
-            useTimerStore.setState({ decrementSeconds: originalDecrementSeconds })
-        }
-    }, [])
+        prevSecondsRef.current = remainingSeconds
+    }, [remainingSeconds])
 
     // --- Visual Update Effect ---
     useEffect(() => {
@@ -100,12 +86,12 @@ export function Timer() {
         setDigitReel(secondsRef, su)
     }, [remainingSeconds]) // Update visuals whenever remainingSeconds changes
 
-    // Note: Mode change effect is now handled by the store's setMode and setIndividualMode actions
-
     // --- Accessibility Text ---
     const minutes = Math.floor(remainingSeconds / 60)
     const seconds = remainingSeconds % 60
-    const formattedAccessibleTime = `Tiempo restante: ${minutes} minuto${minutes !== 1 ? 's' : ''} ${seconds.toString().padStart(2, '0')} segundos`
+    const formattedAccessibleTime = `Tiempo restante: ${minutes} minuto${minutes !== 1 ? 's' : ''} ${seconds
+        .toString()
+        .padStart(2, '0')} segundos`
 
     // --- Render ---
     return (

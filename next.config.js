@@ -9,6 +9,7 @@ const config = {
     experimental: {
         reactCompiler: true,
     },
+    output: 'export'
 }
 
 export default config

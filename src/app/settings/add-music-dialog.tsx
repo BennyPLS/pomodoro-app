@@ -57,14 +57,12 @@ export function AddMusicDialog() {
         try {
             // Get the highest order value
             const allMusic = await db.music.toArray()
-            const highestOrder = allMusic.length > 0 
-                ? Math.max(...allMusic.map(m => m.order ?? 0)) 
-                : -1
+            const highestOrder = allMusic.length > 0 ? Math.max(...allMusic.map((m) => m.order ?? 0)) : -1
 
             // Add the new music with the next order value
             const musicData = {
                 ...data,
-                order: highestOrder + 1
+                order: highestOrder + 1,
             }
             const title = await db.music.add(musicData)
 

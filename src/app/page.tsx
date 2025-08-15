@@ -1,44 +1,14 @@
 'use client'
 import { Timer } from '~/app/_components/timer'
-import dynamic from 'next/dynamic'
-import { Loader2, Volume, Volume1, Volume2, VolumeX } from 'lucide-react'
-import { useEffect } from 'react'
+import { Volume, Volume1, Volume2, VolumeX } from 'lucide-react'
 import { Button } from '~/components/ui/button'
-import { useLiveQuery } from 'dexie-react-hooks'
-import db, { type Music } from '~/lib/db'
 import { Slider } from '~/components/ui/slider'
-import { useMusicPlayerStore } from '~/store/music-player-store'
 import { TopNavBar } from '~/app/_components/top-nav-bar'
-
+import useMusicPlayer from '~/hooks/use-music-player'
 
 export default function Home() {
-    const allMusic = useLiveQuery(() => db.music.toArray())
-
-    // Get state and actions from the music player store
-    const {
-        music,
-        volume,
-        progress,
-        duration,
-        nextMusic: nextMusicAction,
-        playMusic,
-        pauseMusic,
-        handleVolumeChange,
-        handleSeek,
-        initializeWithMusic,
-    } = useMusicPlayerStore()
-
-    // Initialize the music player with the music from the database
-    useEffect(() => {
-        initializeWithMusic(allMusic)
-    }, [allMusic, initializeWithMusic])
-
-    // Create a wrapper for nextMusic that passes the allMusic array
-    const nextMusic = () => {
-        if (allMusic?.length) {
-            nextMusicAction(allMusic)
-        }
-    }
+    const { music, volume, progress, duration, nextMusic, playMusic, pauseMusic, handleVolumeChange, handleSeek } =
+        useMusicPlayer()
 
     return (
         <div className="flex h-svh w-screen flex-col">

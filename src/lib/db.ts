@@ -19,7 +19,6 @@ db.version(1).stores({
     music: 'title, order',
 })
 
-
 // Ensure all music items have an order
 db.on('ready', async () => {
     // Get all music items

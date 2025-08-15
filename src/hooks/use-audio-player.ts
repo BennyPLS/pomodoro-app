@@ -30,7 +30,7 @@ export function useAudioPlayer(blob: Blob) {
     })
 
     useEffect(() => {
-        audioRef.current ??= new Audio();
+        audioRef.current ??= new Audio()
 
         const audio = audioRef.current
         const url = URL.createObjectURL(blob)
