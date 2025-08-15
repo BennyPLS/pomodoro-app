@@ -16,7 +16,8 @@ export const env = createEnv({
      * `NEXT_PUBLIC_`.
      */
     client: {
-        NEXT_PUBLIC_ENV: z.enum(['dev', 'prod'])
+        NEXT_PUBLIC_ENV: z.enum(['dev', 'prod']),
+        NEXT_PUBLIC_BASE_PATH: z.string().optional()
         // NEXT_PUBLIC_CLIENTVAR: z.string(),
     },
 
@@ -26,7 +27,8 @@ export const env = createEnv({
      */
     runtimeEnv: {
         NODE_ENV: process.env.NODE_ENV,
-        NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV
+        NEXT_PUBLIC_ENV: process.env.NEXT_PUBLIC_ENV,
+        NEXT_PUBLIC_BASE_PATH: process.env.NEXT_PUBLIC_BASE_PATH
         // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
     },
     /**

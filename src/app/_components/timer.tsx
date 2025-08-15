@@ -4,6 +4,7 @@
 import { useEffect, useRef } from 'react'
 import { Button } from '~/components/ui/button'
 import { useTimer } from '~/hooks/use-timer'
+import { env } from '~/env'
 
 // --- Constants ---
 const DIGIT_HEIGHT_PX = 128 // Matches h-30 (120px) + gap-2 (8px) in CSS
@@ -64,7 +65,7 @@ export function Timer() {
 
     // --- Audio Initialization ---
     useEffect(() => {
-        finishAudio.current = new Audio('/click.mp3')
+        finishAudio.current = new Audio(`${env.NEXT_PUBLIC_BASE_PATH ?? ''}/click.mp3`)
     }, [])
 
     // --- Play sound when finishing a cycle ---

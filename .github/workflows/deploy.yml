@@ -76,6 +76,7 @@ jobs:
       - name: Build with Next.js
         env:
           NEXT_PUBLIC_ENV: "prod"
+          NEXT_PUBLIC_BASE_PATH: "pomodoro-app"
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

@@ -1,5 +1,6 @@
 'use client'
 import { useEffect } from 'react'
+import { env } from '~/env'
 import db from '~/lib/db'
 
 // Default song titles from the public folder
@@ -31,26 +32,19 @@ export async function insertDefaultSongs() {
     // Only add default songs if the database is empty
     if (count === 0) {
         console.log('Inserting default songs into database...')
-        console.log(DEFAULT_SONGS.length)
 
         for (let i = 0; i < DEFAULT_SONGS.length; i++) {
-            console.log(`Loading ${i}`)
             const songId = DEFAULT_SONGS[i]!
             const songTitle = DEFAULT_SONG_TITLES[songId]
-            const songPath = `/music/${songId}.mp3`
-            console.log(`Loading ${songId}`)
-
+            const songPath = `${env.NEXT_PUBLIC_BASE_PATH ?? ''}/music/${songId}.mp3`
             try {
                 // Fetch the MP3 file
                 console.log(`Loading ${songId}`)
 
                 const response = await fetch(songPath)
-                console.log(`Loading ${songId}`)
                 if (!response.ok) throw new Error(`Failed to fetch ${songPath}`)
-                console.log(`Loaded`)
 
                 const blob = await response.blob()
-                console.log('LOADED BLOB')
                 await db.music.add({
                     title: songTitle,
                     blob: blob,
