@@ -7,12 +7,13 @@ import { TopNavBar } from '~/app/_components/top-nav-bar'
 import useMusicPlayer from '~/hooks/use-music-player'
 
 export default function Home() {
-    const { music, volume, progress, duration, nextMusic, playMusic, pauseMusic, handleVolumeChange, handleSeek } =
+    const { music, volume, progress, duration, isPlaying, nextMusic, playMusic, pauseMusic, handleVolumeChange, handleSeek } =
         useMusicPlayer()
 
     return (
         <div className="flex h-svh w-screen flex-col">
             <TopNavBar
+                isPlaying={isPlaying}
                 nextMusic={nextMusic}
                 playMusic={playMusic}
                 pauseMusic={pauseMusic}

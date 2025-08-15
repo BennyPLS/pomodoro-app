@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import type { Music } from '~/lib/db'
 
 export interface TopNavBarProps {
+    isPlaying: boolean
     actualMusic: Music | undefined
     nextMusic: () => void
     playMusic: () => void
@@ -20,7 +21,7 @@ const ThemeSelector = dynamic(() => import('~/components/theme-selector'), {
     loading: () => <Loader2 className="animate-spin" />,
 })
 
-export function TopNavBar({ nextMusic, playMusic, pauseMusic, actualMusic, progress, duration, seek }: TopNavBarProps) {
+export function TopNavBar({ nextMusic, playMusic, pauseMusic, actualMusic, progress, duration, isPlaying, seek }: TopNavBarProps) {
     return (
         <nav className="flex gap-4 border-b p-4">
             <div className="flex justify-start gap-4">
@@ -28,10 +29,10 @@ export function TopNavBar({ nextMusic, playMusic, pauseMusic, actualMusic, progr
             </div>
             <div className="flex grow flex-col justify-center gap-4">
                 <div className="flex justify-center gap-4">
-                    <Button size="icon" onClick={playMusic}>
+                    <Button size="icon" onClick={playMusic} disabled={isPlaying}>
                         <Play />
                     </Button>
-                    <Button size="icon" onClick={pauseMusic}>
+                    <Button size="icon" onClick={pauseMusic} disabled={!isPlaying}>
                         <Pause />
                     </Button>
                     <Button size="icon" onClick={nextMusic}>
