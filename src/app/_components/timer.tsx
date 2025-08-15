@@ -65,7 +65,7 @@ export function Timer() {
 
     // --- Audio Initialization ---
     useEffect(() => {
-        finishAudio.current = new Audio(`${env.NEXT_PUBLIC_BASE_PATH ?? ''}/click.mp3`)
+        finishAudio.current = new Audio(`click.mp3`)
     }, [])
 
     // --- Play sound when finishing a cycle ---

@@ -19,6 +19,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
     return (
         <html suppressHydrationWarning lang="es" className={`${GeistSans.variable}`}>
             <head>
+
                 {env.NEXT_PUBLIC_ENV === 'dev' && (
                     <Script crossOrigin="anonymous" src="//unpkg.com/react-scan/dist/auto.global.js" />
                 )}

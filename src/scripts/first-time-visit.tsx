@@ -36,7 +36,7 @@ export async function insertDefaultSongs() {
         for (let i = 0; i < DEFAULT_SONGS.length; i++) {
             const songId = DEFAULT_SONGS[i]!
             const songTitle = DEFAULT_SONG_TITLES[songId]
-            const songPath = `${env.NEXT_PUBLIC_BASE_PATH ?? ''}/music/${songId}.mp3`
+            const songPath = `music/${songId}.mp3`
             try {
                 // Fetch the MP3 file
                 console.log(`Loading ${songId}`)
