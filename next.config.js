@@ -10,7 +10,6 @@ const config = {
         reactCompiler: true,
     },
     output: 'export',
-    basePath: process.env.PAGES_BASE_PATH,
 }
 
 export default config
