@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import 'client-only'
-import { Music } from '~/lib/db'
+import db, { Music } from '~/lib/db'
 
 interface MusicPlayerState {
     music: Music | undefined
@@ -63,26 +63,36 @@ export const useMusicPlayerStore = create<MusicPlayerState & MusicPlayerActions>
             const handleTimeUpdate = () => {
                 set({ progress: audioElement.currentTime })
             }
-            
+
             const handleDurationChange = () => {
                 set({ duration: audioElement.duration })
             }
-            
+
             const handleVolumeChange = () => {
                 set({ volume: audioElement.volume })
             }
-            
+
+            const handleEnded = () => {
+                const { nextMusic } = get()
+                const allMusic = db.music.toArray()
+                void allMusic.then((music) => {
+                    if (music?.length) nextMusic(music)
+                })
+            }
+
             // Add event listeners
             audioElement.addEventListener('timeupdate', handleTimeUpdate)
             audioElement.addEventListener('durationchange', handleDurationChange)
             audioElement.addEventListener('volumechange', handleVolumeChange)
-            
+            audioElement.addEventListener('ended', handleEnded)
+
             // Store event listeners for cleanup
             // @ts-ignore - Adding custom property for cleanup
             audioElement._eventListeners = {
                 timeupdate: handleTimeUpdate,
                 durationchange: handleDurationChange,
-                volumechange: handleVolumeChange
+                volumechange: handleVolumeChange,
+                ended: handleEnded,
             }
         }
     },

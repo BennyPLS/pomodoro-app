@@ -3,7 +3,6 @@ import '~/styles/globals.css'
 import { GeistSans } from 'geist/font/sans'
 import { type Metadata } from 'next'
 
-import { TRPCReactProvider } from '~/trpc/react'
 import { type ReactNode } from 'react'
 import ThemeProvider from '~/providers/theme-provider'
 import { Toaster } from '~/components/ui/sonner'
@@ -33,9 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
             </head>
             <body>
                 <Toaster richColors={true} />
-                <TRPCReactProvider>
-                    <ThemeProvider>{children}</ThemeProvider>
-                </TRPCReactProvider>
+                <ThemeProvider>{children}</ThemeProvider>
             </body>
         </html>
     )

@@ -1,13 +1,29 @@
 import { create } from 'zustand'
 
-// Constants from timer.tsx
-const ORDER_SECONDS = [25 * 60, 5 * 60, 25 * 60, 5 * 60, 25 * 60, 5 * 60, 25 * 60, 30 * 60] // Times in seconds
+// Types
 type TimerMode = 'infinite' | 'individually'
 type IndividualMode = 'work' | 'break' | 'longBreak'
+
+// Constants from timer.tsx
+const TWENTY_FIVE_MINUTES = 25 * 60
+const FIVE_MINUTES = 5 * 60
+const THIRTY = 30 * 60
+
+const ORDER_SECONDS = [
+    TWENTY_FIVE_MINUTES,
+    FIVE_MINUTES,
+    TWENTY_FIVE_MINUTES,
+    FIVE_MINUTES,
+    TWENTY_FIVE_MINUTES,
+    FIVE_MINUTES,
+    TWENTY_FIVE_MINUTES,
+    THIRTY,
+]
+
 const MODE_TIMES_SECONDS: Record<IndividualMode, number> = {
-    work: 25 * 60,
-    break: 5 * 60,
-    longBreak: 30 * 60,
+    work: TWENTY_FIVE_MINUTES,
+    break: FIVE_MINUTES,
+    longBreak: THIRTY,
 }
 
 // Timer store state interface
@@ -49,56 +65,56 @@ export const useTimerStore = create<TimerState & TimerActions>((set, get) => ({
         set({ mode })
         // Stop timer when mode changes
         get().stop()
-        
+
         if (mode === 'infinite') {
-            set({ 
+            set({
                 orderIndex: 0,
-                remainingSeconds: ORDER_SECONDS[0] ?? 25 * 60
+                remainingSeconds: ORDER_SECONDS[0] ?? 25 * 60,
             })
         } else {
-            set({ 
-                remainingSeconds: MODE_TIMES_SECONDS[get().individualMode]
+            set({
+                remainingSeconds: MODE_TIMES_SECONDS[get().individualMode],
             })
         }
     },
-    
+
     setIndividualMode: (individualMode) => {
         set({ individualMode })
         // Stop timer when individual mode changes
         get().stop()
-        
+
         if (get().mode === 'individually') {
             set({ remainingSeconds: MODE_TIMES_SECONDS[individualMode] })
         }
     },
-    
+
     setRemainingSeconds: (remainingSeconds) => set({ remainingSeconds }),
-    
+
     decrementSeconds: () => {
         const { remainingSeconds, mode, orderIndex, stop } = get()
-        
+
         if (remainingSeconds <= 1) {
             // Timer finished
             stop()
-            
+
             // Determine next state based on mode
             if (mode === 'infinite') {
                 const nextIndex = (orderIndex + 1) % ORDER_SECONDS.length
                 const nextTime = ORDER_SECONDS[nextIndex] ?? 25 * 60
-                
-                set({ 
+
+                set({
                     orderIndex: nextIndex,
-                    remainingSeconds: nextTime
+                    remainingSeconds: nextTime,
                 })
-                
+
                 // Auto-restart for infinite mode after a short delay
                 setTimeout(() => {
                     get().start()
                 }, 500)
             } else {
                 // Reset to the individual mode time, but don't auto-start
-                set({ 
-                    remainingSeconds: MODE_TIMES_SECONDS[get().individualMode]
+                set({
+                    remainingSeconds: MODE_TIMES_SECONDS[get().individualMode],
                 })
             }
         } else {
@@ -106,57 +122,57 @@ export const useTimerStore = create<TimerState & TimerActions>((set, get) => ({
             set({ remainingSeconds: remainingSeconds - 1 })
         }
     },
-    
+
     setIsRunning: (isRunning) => set({ isRunning }),
     setOrderIndex: (orderIndex) => set({ orderIndex }),
     setIntervalId: (intervalId) => set({ intervalId }),
-    
+
     start: () => {
         const { isRunning, remainingSeconds, intervalId } = get()
-        
+
         // Don't start if already running or if time is up
         if (isRunning || remainingSeconds <= 0) return
-        
+
         // Clear any existing interval
         if (intervalId) clearInterval(intervalId)
-        
+
         // Start new interval
         const newIntervalId = setInterval(() => {
             get().decrementSeconds()
         }, 1000)
-        
-        set({ 
+
+        set({
             isRunning: true,
-            intervalId: newIntervalId
+            intervalId: newIntervalId,
         })
     },
-    
+
     stop: () => {
         const { intervalId } = get()
-        
+
         // Clear interval if it exists
         if (intervalId) clearInterval(intervalId)
-        
-        set({ 
+
+        set({
             isRunning: false,
-            intervalId: null
+            intervalId: null,
         })
     },
-    
+
     reset: () => {
         const { mode, individualMode, stop } = get()
-        
+
         stop()
-        
+
         if (mode === 'infinite') {
-            set({ 
+            set({
                 orderIndex: 0,
-                remainingSeconds: ORDER_SECONDS[0] ?? 25 * 60
+                remainingSeconds: ORDER_SECONDS[0] ?? 25 * 60,
             })
         } else {
-            set({ 
-                remainingSeconds: MODE_TIMES_SECONDS[individualMode]
+            set({
+                remainingSeconds: MODE_TIMES_SECONDS[individualMode],
             })
         }
-    }
+    },
 }))

@@ -1,70 +1,15 @@
 'use client'
 import { Timer } from '~/app/_components/timer'
 import dynamic from 'next/dynamic'
-import { Loader2, Pause, Play, Settings, SkipForward, Volume, Volume1, Volume2, VolumeX } from 'lucide-react'
+import { Loader2, Volume, Volume1, Volume2, VolumeX } from 'lucide-react'
 import { useEffect } from 'react'
 import { Button } from '~/components/ui/button'
-import Link from 'next/link'
 import { useLiveQuery } from 'dexie-react-hooks'
 import db, { type Music } from '~/lib/db'
 import { Slider } from '~/components/ui/slider'
 import { useMusicPlayerStore } from '~/store/music-player-store'
+import { TopNavBar } from '~/app/_components/top-nav-bar'
 
-const ThemeSelector = dynamic(() => import('~/components/theme-selector'), {
-    ssr: false,
-    loading: () => <Loader2 className="animate-spin" />,
-})
-
-export interface TopNavBarProps {
-    actualMusic: Music | undefined
-    nextMusic: () => void
-    playMusic: () => void
-    pauseMusic: () => void
-    progress: number
-    duration: number
-    seek: (value: number) => void
-}
-
-function TopNavBar({ nextMusic, playMusic, pauseMusic, actualMusic, progress, duration, seek }: TopNavBarProps) {
-    return (
-        <nav className="flex gap-4 border-b p-4">
-            <div className="flex justify-start gap-4">
-                <ThemeSelector />
-            </div>
-            <div className="flex grow flex-col justify-center gap-4">
-                <div className="flex justify-center gap-4">
-                    <Button size="icon" onClick={playMusic}>
-                        <Play />
-                    </Button>
-                    <Button size="icon" onClick={pauseMusic}>
-                        <Pause />
-                    </Button>
-                    <Button size="icon" onClick={nextMusic}>
-                        <SkipForward />
-                    </Button>
-                </div>
-                <div className="text-center">{actualMusic?.title ?? 'No Selected'}</div>
-                {/* Progress slider */}
-                <div className="w-full px-4 flex sm:justify-center">
-                    <Slider
-                        value={[progress]}
-                        max={duration}
-                        step={0.1}
-                        onValueChange={(value) => seek(value[0]!)}
-                        className="sm:w-56"
-                    />
-                </div>
-            </div>
-            <div className="flex justify-end gap-4">
-                <Button size="icon" asChild>
-                    <Link href="/settings">
-                        <Settings />
-                    </Link>
-                </Button>
-            </div>
-        </nav>
-    )
-}
 
 export default function Home() {
     const allMusic = useLiveQuery(() => db.music.toArray())
@@ -80,7 +25,7 @@ export default function Home() {
         pauseMusic,
         handleVolumeChange,
         handleSeek,
-        initializeWithMusic
+        initializeWithMusic,
     } = useMusicPlayerStore()
 
     // Initialize the music player with the music from the database
