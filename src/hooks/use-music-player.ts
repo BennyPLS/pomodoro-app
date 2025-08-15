@@ -36,7 +36,9 @@ export default function useMusicPlayer() {
         audio.volume = volume
         audioRef.current = audio
 
-        const handleTimeUpdate = () => setProgress(audio.currentTime)
+        const handleTimeUpdate = () => {
+            setProgress(audio.currentTime)
+        }
         const handleDurationChange = () => setDuration(audio.duration || 0)
         const handleVolumeChange = () => setVolume(audio.volume)
         const handleEnded = () => {
@@ -103,7 +105,7 @@ export default function useMusicPlayer() {
             // Revoke URL when switching tracks
             URL.revokeObjectURL(blobUrl)
         }
-    }, [music, isPlaying])
+    }, [music])
 
     const playMusic = useCallback(() => {
         const audio = audioRef.current
