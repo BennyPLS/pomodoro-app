@@ -6,7 +6,7 @@ const config = {
         reactCompiler: true,
     },
     output: 'export',
-    basePath: 'pomodoro-app'
+    basePath: process.env.BASE_PATH
 }
 
 export default config

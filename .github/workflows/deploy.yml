@@ -44,7 +44,7 @@ jobs:
         env:
           SKIP_ENV_VALIDATION: true
           NEXT_PUBLIC_ENV: "prod"
-          BASE_PATH: "pomodoro-app"
+          BASE_PATH: "/pomodoro-app"
         run: npx next build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
