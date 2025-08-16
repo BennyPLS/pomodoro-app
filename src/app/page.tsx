@@ -7,8 +7,18 @@ import { TopNavBar } from '~/app/_components/top-nav-bar'
 import useMusicPlayer from '~/hooks/use-music-player'
 
 export default function Home() {
-    const { music, volume, progress, duration, isPlaying, nextMusic, playMusic, pauseMusic, handleVolumeChange, handleSeek } =
-        useMusicPlayer()
+    const {
+        music,
+        volume,
+        progress,
+        duration,
+        isPlaying,
+        nextMusic,
+        playMusic,
+        pauseMusic,
+        handleVolumeChange,
+        handleSeek,
+    } = useMusicPlayer()
 
     return (
         <div className="flex h-svh w-screen flex-col">
@@ -23,7 +33,7 @@ export default function Home() {
                 seek={handleSeek}
             />
             <main className="flex grow items-center justify-center gap-4">
-                <Timer />
+                <Timer playMusic={playMusic} />
             </main>
             <div className="flex items-center gap-2 border-t p-4 sm:justify-center">
                 <Button size="icon">

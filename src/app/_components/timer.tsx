@@ -41,7 +41,7 @@ const getDigitsFromSeconds = (
 }
 
 // --- Timer Component ---
-export function Timer() {
+export function Timer({ playMusic }: { playMusic: () => void }) {
     // --- Get state and actions from hook ---
     const {
         mode,
@@ -206,7 +206,10 @@ export function Timer() {
 
             {/* Control Buttons */}
             <div className="mt-2 flex gap-4">
-                <Button onClick={handleStart} disabled={isRunning || remainingSeconds === 0}>
+                <Button onClick={() => {
+                    handleStart()
+                    playMusic()
+                }} disabled={isRunning || remainingSeconds === 0}>
                     Comenzar
                 </Button>
                 <Button onClick={handleStop} disabled={!isRunning}>
