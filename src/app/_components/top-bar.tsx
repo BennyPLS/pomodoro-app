@@ -3,25 +3,25 @@ import { Loader2, Pause, Play, Settings, SkipForward } from 'lucide-react'
 import { Slider } from '~/components/ui/slider'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import type { Music } from '~/lib/db'
-
-export interface TopNavBarProps {
-    isPlaying: boolean
-    actualMusic: Music | undefined
-    nextMusic: () => void
-    playMusic: () => void
-    pauseMusic: () => void
-    progress: number
-    duration: number
-    seek: (value: number) => void
-}
+import useMusicPlayer from '~/providers/music-provider'
 
 const ThemeSelector = dynamic(() => import('~/components/theme-selector'), {
     ssr: false,
     loading: () => <Loader2 className="animate-spin" />,
 })
 
-export function TopNavBar({ nextMusic, playMusic, pauseMusic, actualMusic, progress, duration, isPlaying, seek }: TopNavBarProps) {
+export function TopBar() {
+    const [next, play, pause, music, progress, duration, isPlaying, seek] = useMusicPlayer((store) => [
+        store.next,
+        store.play,
+        store.pause,
+        store.music,
+        store.progress,
+        store.duration,
+        store.isPlaying,
+        store.seek,
+    ])
+
     return (
         <nav className="flex gap-4 border-b p-4">
             <div className="flex justify-start gap-4">
@@ -29,17 +29,17 @@ export function TopNavBar({ nextMusic, playMusic, pauseMusic, actualMusic, progr
             </div>
             <div className="flex grow flex-col justify-center gap-4">
                 <div className="flex justify-center gap-4">
-                    <Button size="icon" onClick={playMusic} disabled={isPlaying}>
+                    <Button size="icon" onClick={play} disabled={isPlaying}>
                         <Play />
                     </Button>
-                    <Button size="icon" onClick={pauseMusic} disabled={!isPlaying}>
+                    <Button size="icon" onClick={pause} disabled={!isPlaying}>
                         <Pause />
                     </Button>
-                    <Button size="icon" onClick={nextMusic}>
+                    <Button size="icon" onClick={next}>
                         <SkipForward />
                     </Button>
                 </div>
-                <div className="text-center">{actualMusic?.title ?? 'No Selected'}</div>
+                <div className="text-center">{music?.title ?? 'No Selected'}</div>
                 {/* Progress slider */}
                 <div className="flex w-full px-4 sm:justify-center">
                     <Slider

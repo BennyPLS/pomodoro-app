@@ -48,7 +48,7 @@ const DropdownMenuSubContent = ({
     ref,
     className,
     ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.SubContent>) => (
+}: ComponentProps<typeof DropdownMenuPrimitive.SubContent>) => (
     <DropdownMenuPrimitive.SubContent
         ref={ref}
         className={cn(
@@ -66,7 +66,7 @@ const DropdownMenuContent = ({
     className,
     sideOffset = 4,
     ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) => (
+}: ComponentProps<typeof DropdownMenuPrimitive.Content>) => (
     <DropdownMenuPrimitive.Portal>
         <DropdownMenuPrimitive.Content
             ref={ref}
@@ -110,7 +110,7 @@ const DropdownMenuCheckboxItem = ({
     children,
     checked,
     ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>) => (
+}: ComponentProps<typeof DropdownMenuPrimitive.CheckboxItem>) => (
     <DropdownMenuPrimitive.CheckboxItem
         ref={ref}
         className={cn(
@@ -136,7 +136,7 @@ const DropdownMenuRadioItem = ({
     className,
     children,
     ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.RadioItem>) => (
+}: ComponentProps<typeof DropdownMenuPrimitive.RadioItem>) => (
     <DropdownMenuPrimitive.RadioItem
         ref={ref}
         className={cn(
@@ -177,13 +177,13 @@ const DropdownMenuSeparator = ({
     ref,
     className,
     ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Separator>) => (
+}: ComponentProps<typeof DropdownMenuPrimitive.Separator>) => (
     <DropdownMenuPrimitive.Separator ref={ref} className={cn('bg-muted -mx-1 my-1 h-px', className)} {...props} />
 )
 
 DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName
 
-const DropdownMenuShortcut = ({ className, ...props }: React.ComponentProps<'span'>) => {
+const DropdownMenuShortcut = ({ className, ...props }: ComponentProps<'span'>) => {
     return <span className={cn('ml-auto text-xs tracking-widest opacity-60', className)} {...props} />
 }
 

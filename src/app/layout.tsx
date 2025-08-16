@@ -9,6 +9,8 @@ import { Toaster } from '~/components/ui/sonner'
 import Script from 'next/script'
 import FirstTimeVisitScript from '~/scripts/first-time-visit'
 import { env } from '~/env'
+import { TimerProvider } from '~/providers/timer-provider'
+import { MusicPlayerProvider } from '~/providers/music-provider'
 
 export const metadata: Metadata = {
     description: 'Simple pomodoro timer',
@@ -26,7 +28,11 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
             </head>
             <body>
                 <Toaster richColors={true} />
-                <ThemeProvider>{children}</ThemeProvider>
+                <MusicPlayerProvider>
+                    <TimerProvider>
+                        <ThemeProvider>{children}</ThemeProvider>
+                    </TimerProvider>
+                </MusicPlayerProvider>
             </body>
         </html>
     )

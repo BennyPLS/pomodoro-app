@@ -1,10 +1,7 @@
-// Timer.tsx (Refactored)
-
-'use client'
-import { useEffect, useRef } from 'react'
+import { RefObject, useEffect, useRef } from 'react'
 import { Button } from '~/components/ui/button'
-import { useTimer } from '~/hooks/use-timer'
-import { env } from '~/env'
+import useTimer from '~/providers/timer-provider'
+import useMusicPlayer from '~/providers/music-provider'
 
 // --- Constants ---
 const DIGIT_HEIGHT_PX = 128 // Matches h-30 (120px) + gap-2 (8px) in CSS
@@ -14,7 +11,7 @@ type TIME_DIGIT = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 // --- Helper Functions ---
 
 // Sets the visual position of a single digit reel
-const setDigitReel = (ref: React.RefObject<HTMLDivElement | null>, digit: TIME_DIGIT) => {
+const setDigitReel = (ref: RefObject<HTMLDivElement | null>, digit: TIME_DIGIT) => {
     if (!ref.current) return
     // Calculate top offset: (digit - 9) * DIGIT_HEIGHT_PX
     ref.current.style.top = `${(digit - 9) * DIGIT_HEIGHT_PX}px`
@@ -41,7 +38,8 @@ const getDigitsFromSeconds = (
 }
 
 // --- Timer Component ---
-export function Timer({ playMusic }: { playMusic: () => void }) {
+export function Timer() {
+    const [playMusic, pauseMusic] = useMusicPlayer((store) => [store.play, store.pause])
     // --- Get state and actions from hook ---
     const {
         mode,
@@ -53,7 +51,7 @@ export function Timer({ playMusic }: { playMusic: () => void }) {
         start: handleStart,
         stop: handleStop,
         reset: handleReset,
-    } = useTimer()
+    } = useTimer((store) => store)
 
     // --- Refs ---
     const finishAudio = useRef<HTMLAudioElement | null>(null)
@@ -206,13 +204,19 @@ export function Timer({ playMusic }: { playMusic: () => void }) {
 
             {/* Control Buttons */}
             <div className="mt-2 flex gap-4">
-                <Button onClick={() => {
-                    handleStart()
-                    playMusic()
-                }} disabled={isRunning || remainingSeconds === 0}>
+                <Button
+                    onClick={() => {
+                        handleStart()
+                        playMusic()
+                    }}
+                    disabled={isRunning || remainingSeconds === 0}
+                >
                     Comenzar
                 </Button>
-                <Button onClick={handleStop} disabled={!isRunning}>
+                <Button onClick={() => {
+                    handleStop()
+                    pauseMusic()
+                }} disabled={!isRunning}>
                     Parar
                 </Button>
                 <Button onClick={handleReset} disabled={isRunning}>
