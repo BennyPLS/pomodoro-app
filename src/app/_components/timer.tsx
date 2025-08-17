@@ -152,6 +152,7 @@ export function Timer() {
                         <div
                             className="absolute left-0 flex flex-col gap-2 transition-all duration-300 ease-in-out"
                             ref={minutesTensRef}
+                            style={{ top: '-896px' }}
                         >
                             {NUMBERS.map((number) => (
                                 <span className="flex h-30 w-20 items-center justify-center" key={`mt-${number}`}>
@@ -164,6 +165,7 @@ export function Timer() {
                         <div
                             className="absolute left-0 flex flex-col gap-2 transition-all duration-300 ease-in-out"
                             ref={minutesRef}
+                            style={{ top: '-512px' }}
                         >
                             {NUMBERS.map((number) => (
                                 <span className="flex h-30 w-20 items-center justify-center" key={`m-${number}`}>
@@ -177,6 +179,7 @@ export function Timer() {
                         <div
                             className="absolute left-0 flex flex-col gap-2 transition-all duration-300 ease-in-out"
                             ref={secondsTensRef}
+                            style={{ top: '-1152px' }}
                         >
                             {NUMBERS.map((number) => (
                                 <span className="flex h-30 w-20 items-center justify-center" key={`st-${number}`}>
@@ -189,6 +192,7 @@ export function Timer() {
                         <div
                             className="absolute left-0 flex flex-col gap-2 transition-all duration-300 ease-in-out"
                             ref={secondsRef}
+                            style={{ top: '-1152px' }}
                         >
                             {NUMBERS.map((number) => (
                                 <span className="flex h-30 w-20 items-center justify-center" key={`s-${number}`}>
@@ -213,10 +217,13 @@ export function Timer() {
                 >
                     Comenzar
                 </Button>
-                <Button onClick={() => {
-                    handleStop()
-                    pauseMusic()
-                }} disabled={!isRunning}>
+                <Button
+                    onClick={() => {
+                        handleStop()
+                        pauseMusic()
+                    }}
+                    disabled={!isRunning}
+                >
                     Parar
                 </Button>
                 <Button onClick={handleReset} disabled={isRunning}>

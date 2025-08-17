@@ -1,12 +1,12 @@
 'use client'
 
-import { createContext, type ReactNode, RefObject, useContext, useEffect, useMemo, useRef } from 'react'
-import { createStore, type StoreApi } from 'zustand/vanilla'
-import { useStore } from 'zustand'
-import { useLiveQuery } from 'dexie-react-hooks'
-import db, { type Music } from '~/lib/db'
-import { subscribeWithSelector } from 'zustand/middleware'
-import { useShallow } from 'zustand/react/shallow'
+import {createContext, type ReactNode, RefObject, useContext, useEffect, useMemo, useRef} from 'react'
+import {createStore, type StoreApi} from 'zustand/vanilla'
+import {useStore} from 'zustand'
+import {useLiveQuery} from 'dexie-react-hooks'
+import db, {type Music} from '~/lib/db'
+import {subscribeWithSelector} from 'zustand/middleware'
+import {useShallow} from 'zustand/react/shallow'
 
 interface MusicPlayerState {
     music: Music | undefined
@@ -75,8 +75,11 @@ function createMusicPlayerStore(deps: {
             setVolume: (v: number) => {
                 const audio = audioRef.current
                 if (!audio) return
-                audio.volume = v
-                set({ volume: v })
+                const clamped = Math.min(1, Math.max(0, v))
+                if (audio.volume !== clamped) {
+                    audio.volume = clamped
+                }
+                set({ volume: clamped })
             },
 
             seek: (time: number) => {
@@ -109,6 +112,8 @@ function createMusicPlayerStore(deps: {
 // Context that confines the store instance
 const MusicPlayerStoreContext = createContext<StoreApi<MusicPlayerStore> | null>(null)
 
+const VOLUME_KEY = 'mp:volume'
+
 export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     const audioRef = useRef<HTMLAudioElement | null>(null)
     const selectedTitleRef = useRef<string | undefined>(undefined)
@@ -116,7 +121,6 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
 
     const store = useMemo(() => createMusicPlayerStore({ audioRef, selectedTitleRef }), [])
 
-    // Reactive DB list -> store
     const allMusic = useLiveQuery(() => db.music.orderBy('order').toArray())
 
     useEffect(() => {
@@ -135,11 +139,9 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
                 return
             }
         }
-        // Fallback to first item
         store.setState({ music: allMusic[0] })
     }, [allMusic, store])
 
-    // Keep selected title in a ref
     const music = useStore(store, (s) => s.music)
     useEffect(() => {
         selectedTitleRef.current = music?.title
@@ -149,22 +151,32 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const audio = new Audio()
         audio.preload = 'metadata'
-        // initialize volume from store
-        audio.volume = store.getState().volume
-        audioRef.current = audio
+
+        try {
+            const raw = localStorage.getItem(VOLUME_KEY)
+            const parsed = raw !== null ? Number(raw) : NaN
+            const clamped = Number.isFinite(parsed) ? Math.min(1, Math.max(0, parsed)) : NaN
+            if (!Number.isNaN(clamped)) {
+                audio.volume = clamped
+                store.setState({ volume: clamped })
+            } else {
+                audio.volume = store.getState().volume
+            }
+        } catch {
+            audio.volume = store.getState().volume
+        }
 
         const handleTimeUpdate = () => {
             store.setState({ progress: audio.currentTime })
         }
         const handleDurationChange = () => store.setState({ duration: audio.duration || 0 })
-        const handleVolumeChange = () => store.setState({ volume: audio.volume })
+
         const handleEnded = () => {
             store.getState().next()
         }
 
         audio.addEventListener('timeupdate', handleTimeUpdate)
         audio.addEventListener('durationchange', handleDurationChange)
-        audio.addEventListener('volumechange', handleVolumeChange)
         audio.addEventListener('ended', handleEnded)
 
         return () => {
@@ -173,7 +185,6 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
             audio.load()
             audio.removeEventListener('timeupdate', handleTimeUpdate)
             audio.removeEventListener('durationchange', handleDurationChange)
-            audio.removeEventListener('volumechange', handleVolumeChange)
             audio.removeEventListener('ended', handleEnded)
         }
     }, [store])
@@ -243,6 +254,22 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
                 lastUrlRef.current = null
             }
         }
+    }, [store])
+
+    // Persist volume changes to localStorage
+    useEffect(() => {
+        return store.subscribe(
+            (s) => s.volume,
+            (v) => {
+                try {
+                    if (typeof window !== 'undefined') {
+                        window.localStorage.setItem('mp:volume', String(v))
+                    }
+                } catch {
+                    // ignore persistence errors
+                }
+            }
+        )
     }, [store])
 
     return <MusicPlayerStoreContext.Provider value={store}>{children}</MusicPlayerStoreContext.Provider>

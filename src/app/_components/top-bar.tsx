@@ -7,7 +7,7 @@ import useMusicPlayer from '~/providers/music-provider'
 
 const ThemeSelector = dynamic(() => import('~/components/theme-selector'), {
     ssr: false,
-    loading: () => <Loader2 className="animate-spin" />,
+    loading: () => <Loader2 className="animate-spin size-8 p-1" />,
 })
 
 export function TopBar() {
