@@ -21,10 +21,9 @@ interface MusicPlayerActions {
     play: () => void
     pause: () => void
     next: () => void
-    handleVolumeChange: (v: number) => void
+    setVolume: (v: number) => void
     seek: (time: number) => void
     setMusic: (m: Music | undefined) => void
-    setVolume: (v: number) => void
     setMusics: (list: Music[]) => void
 }
 
@@ -73,16 +72,11 @@ function createMusicPlayerStore(deps: {
                 set({ isPlaying: false })
             },
 
-            handleVolumeChange: (v: number) => {
+            setVolume: (v: number) => {
                 const audio = audioRef.current
                 if (!audio) return
                 audio.volume = v
                 set({ volume: v })
-            },
-
-            setVolume: (v: number) => {
-                // alias to keep external API flexible
-                get().handleVolumeChange(v)
             },
 
             seek: (time: number) => {
