@@ -8,15 +8,35 @@ export interface Music {
     order?: number
 }
 
+// Add: timer session log entry
+export interface TimerSession {
+    id?: number
+    type: 'work' | 'break' | 'longBreak'
+    startedAt: Date
+    endedAt: Date
+    durationSec: number
+}
+
 export const db = new Dexie('db') as Dexie & {
     music: EntityTable<
         Music,
         'title' // primary key "id" (for the typings only)
     >
+    // Add: table typing
+    timerSessions: EntityTable<
+        TimerSession,
+        'id'
+    >
 }
 
 db.version(1).stores({
     music: 'title, order',
+})
+
+// Add: version 2 for timerSessions
+db.version(2).stores({
+    music: 'title, order',
+    timerSessions: '++id, startedAt, type',
 })
 
 // Ensure all music items have an order

@@ -47,7 +47,7 @@ export function Timer() {
         remainingSeconds,
         isRunning,
         setMode: handleSetMode,
-        setIndividualMode: handleSetIndividualMode,
+        setIndividualMode: setIndividualMode,
         start: handleStart,
         stop: handleStop,
         reset: handleReset,
@@ -56,6 +56,7 @@ export function Timer() {
     // --- Refs ---
     const finishAudio = useRef<HTMLAudioElement | null>(null)
     const prevSecondsRef = useRef<number | null>(null)
+
     const minutesTensRef = useRef<HTMLDivElement>(null)
     const minutesRef = useRef<HTMLDivElement>(null)
     const secondsTensRef = useRef<HTMLDivElement>(null)
@@ -115,19 +116,19 @@ export function Timer() {
                 {mode === 'individually' && (
                     <div className="flex gap-4">
                         <Button
-                            onClick={() => handleSetIndividualMode('work')}
+                            onClick={() => setIndividualMode('work')}
                             variant={individualMode === 'work' ? 'secondary' : 'ghost'}
                         >
                             Trabajo
                         </Button>
                         <Button
-                            onClick={() => handleSetIndividualMode('break')}
+                            onClick={() => setIndividualMode('break')}
                             variant={individualMode === 'break' ? 'secondary' : 'ghost'}
                         >
                             Descanso
                         </Button>
                         <Button
-                            onClick={() => handleSetIndividualMode('longBreak')}
+                            onClick={() => setIndividualMode('longBreak')}
                             variant={individualMode === 'longBreak' ? 'secondary' : 'ghost'}
                         >
                             Descanso Largo
