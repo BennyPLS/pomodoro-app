@@ -37,9 +37,9 @@ export default function SimpleFormField<TFieldValues extends FieldValues, TConte
             name={name}
             render={(input) => (
                 <FormItem className={cn('w-full', className)}>
-                    <FormLabel className="font-mullerBold">{label}</FormLabel>
+                    <FormLabel>{label}</FormLabel>
                     <FormControl>{render(input)}</FormControl>
-                    <FormMessage className="font-mullerBold text-wrap" />
+                    <FormMessage className="text-wrap" />
                 </FormItem>
             )}
         />

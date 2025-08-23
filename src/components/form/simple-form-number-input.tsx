@@ -27,11 +27,11 @@ export default function SimpleFormNumberInput<TFieldValues extends FieldValues, 
             name={name}
             render={({ field }) => (
                 <FormItem className={cn('w-full', className)}>
-                    <FormLabel className="font-mullerBold">{label}</FormLabel>
+                    <FormLabel>{label}</FormLabel>
                     <FormControl>
                         <Input min={min} max={max} value={field.value} type="number" onChange={field.onChange} />
                     </FormControl>
-                    <FormMessage className="font-mullerBold text-wrap" />
+                    <FormMessage className="text-wrap" />
                 </FormItem>
             )}
         />
