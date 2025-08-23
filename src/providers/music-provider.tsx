@@ -1,12 +1,12 @@
 'use client'
 
-import {createContext, type ReactNode, RefObject, useContext, useEffect, useMemo, useRef} from 'react'
-import {createStore, type StoreApi} from 'zustand/vanilla'
-import {useStore} from 'zustand'
-import {useLiveQuery} from 'dexie-react-hooks'
-import db, {type Music} from '~/lib/db'
-import {subscribeWithSelector} from 'zustand/middleware'
-import {useShallow} from 'zustand/react/shallow'
+import { createContext, type ReactNode, RefObject, useContext, useEffect, useMemo, useRef } from 'react'
+import { createStore, type StoreApi } from 'zustand/vanilla'
+import { useStore } from 'zustand'
+import { useLiveQuery } from 'dexie-react-hooks'
+import db, { type Music } from '~/lib/db'
+import { subscribeWithSelector } from 'zustand/middleware'
+import { useShallow } from 'zustand/react/shallow'
 
 interface MusicPlayerState {
     music: Music | undefined
@@ -151,6 +151,7 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         const audio = new Audio()
         audio.preload = 'metadata'
+        audioRef.current = audio
 
         try {
             const raw = localStorage.getItem(VOLUME_KEY)
@@ -166,14 +167,9 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
             audio.volume = store.getState().volume
         }
 
-        const handleTimeUpdate = () => {
-            store.setState({ progress: audio.currentTime })
-        }
+        const handleTimeUpdate = () => store.setState({ progress: audio.currentTime })
         const handleDurationChange = () => store.setState({ duration: audio.duration || 0 })
-
-        const handleEnded = () => {
-            store.getState().next()
-        }
+        const handleEnded = () => store.getState().next()
 
         audio.addEventListener('timeupdate', handleTimeUpdate)
         audio.addEventListener('durationchange', handleDurationChange)
