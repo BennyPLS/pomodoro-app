@@ -55,11 +55,7 @@ interface TimerState {
 interface TimerActions {
     setMode: (mode: TimerMode) => void
     setIndividualMode: (mode: IndividualMode) => void
-    setRemainingSeconds: (seconds: number) => void
     decrementSeconds: () => void
-    setIsRunning: (isRunning: boolean) => void
-    setOrderIndex: (index: number) => void
-    setIntervalId: (id: number | null) => void
     start: () => void
     stop: () => void
     reset: () => void
@@ -67,36 +63,39 @@ interface TimerActions {
 
 type TimerStore = TimerState & TimerActions
 
+function getPhaseTypeFromState(s: Pick<TimerState, 'mode' | 'individualMode' | 'orderIndex'>): IndividualMode {
+    // For individual mode, return the selected mode directly
+    if (s.mode === 'individually') return s.individualMode
+
+    // For infinite mode, determine phase based on position in sequence
+    // Sequence: work -> break -> work -> break -> work -> break -> work -> longBreak
+    const idx: number = s.orderIndex % ORDER_SECONDS.length
+
+    if (idx === 1 || idx === 3 || idx === 5) return 'break'
+    if (idx === 7) return 'longBreak'
+    return 'work' // Default to work phase for remaining indices (0,2,4,6)
+}
+
+// Helper: persist a finished/partial phase
+async function persistPhase(payload: {
+    type: IndividualMode
+    startedAt: number
+    endedAt: number
+    durationSec: number
+}) {
+    try {
+        await db.timerSessions.add({
+            type: payload.type,
+            startedAt: new Date(payload.startedAt),
+            endedAt: new Date(payload.endedAt),
+            durationSec: payload.durationSec,
+        })
+    } catch {
+        // ignore persistence errors
+    }
+}
+
 function createTimerStore() {
-    // Helper: determine phase type from state
-    const getPhaseTypeFromState = (s: Pick<TimerState, 'mode' | 'individualMode' | 'orderIndex'>): IndividualMode => {
-        if (s.mode === 'individually') return s.individualMode
-        // infinite mode sequence: work, break, work, break, work, break, work, longBreak
-        const idx = s.orderIndex % ORDER_SECONDS.length
-        if (idx === 1 || idx === 3 || idx === 5) return 'break'
-        if (idx === 7) return 'longBreak'
-        return 'work'
-    }
-
-    // Helper: persist a finished/partial phase
-    const persistPhase = async (payload: {
-        type: IndividualMode
-        startedAt: number
-        endedAt: number
-        durationSec: number
-    }) => {
-        try {
-            await db.timerSessions.add({
-                type: payload.type,
-                startedAt: new Date(payload.startedAt),
-                endedAt: new Date(payload.endedAt),
-                durationSec: payload.durationSec,
-            })
-        } catch {
-            // ignore persistence errors
-        }
-    }
-
     return createStore<TimerStore>((set, get) => ({
         // State
         mode: 'infinite',
@@ -140,11 +139,6 @@ function createTimerStore() {
                 remainingSeconds: MODE_TIMES_SECONDS[newIndividualMode],
             })
         },
-
-        setRemainingSeconds: (seconds) => set({ remainingSeconds: seconds }),
-        setIsRunning: (isRunning) => set({ isRunning }),
-        setOrderIndex: (index) => set({ orderIndex: index }),
-        setIntervalId: (id) => set({ intervalId: id }),
 
         stop: () => {
             const state = get()
@@ -235,18 +229,13 @@ function createTimerStore() {
                 phaseType,
             } = get()
 
-            // Determine current phase type (use tracked phase when available)
-            const currentType = phaseType ?? getPhaseTypeFromState(get())
-            const addOneSecondToSessionTotals = () => {
-                const isWork = currentType === 'work'
-                set({
-                    sessionTotalSec: sessionTotalSec + 1,
-                    sessionWorkSec: sessionWorkSec + (isWork ? 1 : 0),
-                    sessionRestSec: sessionRestSec + (isWork ? 0 : 1),
-                })
-            }
-
-            addOneSecondToSessionTotals()
+            // Determine the current phase type (use tracked phase when available)
+            const isWork = ( phaseType ?? getPhaseTypeFromState(get()) ) === 'work'
+            set({
+                sessionTotalSec: sessionTotalSec + 1,
+                sessionWorkSec: sessionWorkSec + (isWork ? 1 : 0),
+                sessionRestSec: sessionRestSec + (isWork ? 0 : 1),
+            })
 
             if (remainingSeconds > 1) {
                 set({ remainingSeconds: remainingSeconds - 1 })
@@ -274,6 +263,8 @@ function createTimerStore() {
 // Context to confine the store
 const TimerStoreContext = createContext<StoreApi<TimerStore> | null>(null)
 
+const PENDING_PHASE = 'timer:pendingPhase'
+
 export function TimerProvider({ children }: { children: ReactNode }) {
     const storeRef = useRef<StoreApi<TimerStore> | null>(null)
     const closedRef = useRef(false)
@@ -284,9 +275,8 @@ export function TimerProvider({ children }: { children: ReactNode }) {
 
     // On mount: flush any pending phase captured during a previous close
     useEffect(() => {
-        const key = 'timer:pendingPhase'
         try {
-            const raw = localStorage.getItem(key)
+            const raw = localStorage.getItem(PENDING_PHASE)
             if (raw) {
                 const payload = JSON.parse(raw) as {
                     type: IndividualMode
@@ -300,7 +290,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
                     endedAt: new Date(payload.endedAt),
                     durationSec: payload.durationSec,
                 })
-                localStorage.removeItem(key)
+                localStorage.removeItem(PENDING_PHASE)
             }
         } catch {
             // ignore errors
@@ -309,7 +299,6 @@ export function TimerProvider({ children }: { children: ReactNode }) {
 
     // Persist on window close/tab hide by caching to localStorage synchronously
     useEffect(() => {
-        const key = 'timer:pendingPhase'
         const handlePersistOnClose = () => {
             const s = storeRef.current?.getState()
             if (!s) return
@@ -333,7 +322,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
                 }
 
                 try {
-                    localStorage.setItem(key, JSON.stringify(payload))
+                    localStorage.setItem(PENDING_PHASE, JSON.stringify(payload))
                 } catch {
                     // ignore storage errors
                 }
