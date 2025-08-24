@@ -2,9 +2,12 @@ import { RefObject, useEffect, useRef } from 'react'
 import { Button } from '~/components/ui/button'
 import useTimer from '~/providers/timer-provider'
 import useMusicPlayer from '~/providers/music-provider'
+import { useLocalStorage } from '~/hooks/use-local-storage'
+import { Dumbbell, EyeClosed, Star, Timer as TimerIcon } from 'lucide-react'
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '~/components/ui/drawer'
 
 // --- Constants ---
-const DIGIT_HEIGHT_PX = 128 // Matches h-30 (120px) + gap-2 (8px) in CSS
+const DIGIT_HEIGHT_PX = 128 // Matches h-30 (120 px) + gap-2 (8 px) in CSS
 const NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].reverse()
 type TIME_DIGIT = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 
@@ -13,7 +16,6 @@ type TIME_DIGIT = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 // Sets the visual position of a single digit reel
 const setDigitReel = (ref: RefObject<HTMLDivElement | null>, digit: TIME_DIGIT) => {
     if (!ref.current) return
-    // Calculate top offset: (digit - 9) * DIGIT_HEIGHT_PX
     ref.current.style.top = `${(digit - 9) * DIGIT_HEIGHT_PX}px`
 }
 
@@ -39,19 +41,7 @@ const getDigitsFromSeconds = (
 
 // --- Timer Component ---
 export function Timer() {
-    const [playMusic, pauseMusic] = useMusicPlayer((store) => [store.play, store.pause])
-    // --- Get state and actions from hook ---
-    const {
-        mode,
-        individualMode,
-        remainingSeconds,
-        isRunning,
-        setMode: handleSetMode,
-        setIndividualMode: setIndividualMode,
-        start: handleStart,
-        stop: handleStop,
-        reset: handleReset,
-    } = useTimer((store) => store)
+    const [pomodoroSmartMusic] = useLocalStorage('pomodoro-smart-music', true)
 
     // --- Refs ---
     const finishAudio = useRef<HTMLAudioElement | null>(null)
@@ -61,6 +51,27 @@ export function Timer() {
     const minutesRef = useRef<HTMLDivElement>(null)
     const secondsTensRef = useRef<HTMLDivElement>(null)
     const secondsRef = useRef<HTMLDivElement>(null)
+
+    const [play, pause] = useMusicPlayer((store) => [store.play, store.pause])
+
+    // --- Get state and actions from hook ---
+    const {
+        mode,
+        individualMode,
+        remainingSeconds,
+        isRunning,
+        setMode,
+        setIndividualMode,
+        start,
+        stop,
+        reset,
+    } = useTimer((store) => store)
+
+    useEffect(() => {
+        if (!pomodoroSmartMusic) return
+
+        isRunning ? play() : pause()
+    }, [isRunning, play, pause, pomodoroSmartMusic])
 
     // --- Audio Initialization ---
     useEffect(() => {
@@ -98,11 +109,11 @@ export function Timer() {
         <div className="flex flex-col items-center justify-center gap-2">
             {/* Mode Buttons */}
             <div className="flex gap-4">
-                <Button onClick={() => handleSetMode('infinite')} variant={mode === 'infinite' ? 'default' : 'outline'}>
+                <Button onClick={() => setMode('infinite')} variant={mode === 'infinite' ? 'default' : 'outline'}>
                     Infinito
                 </Button>
                 <Button
-                    onClick={() => handleSetMode('individually')}
+                    onClick={() => setMode('individually')}
                     variant={mode === 'individually' ? 'default' : 'outline'}
                 >
                     Individual
@@ -111,7 +122,6 @@ export function Timer() {
 
             {/* Individual Mode Selection (always reserve space but conditionally show content) */}
             <div className="mt-2 flex h-9 items-center">
-                {' '}
                 {/* Fixed height container */}
                 {mode === 'individually' && (
                     <div className="flex gap-4">
@@ -209,25 +219,13 @@ export function Timer() {
 
             {/* Control Buttons */}
             <div className="mt-2 flex gap-4">
-                <Button
-                    onClick={() => {
-                        handleStart()
-                        playMusic()
-                    }}
-                    disabled={isRunning || remainingSeconds === 0}
-                >
+                <Button onClick={start} disabled={isRunning || remainingSeconds === 0}>
                     Comenzar
                 </Button>
-                <Button
-                    onClick={() => {
-                        handleStop()
-                        pauseMusic()
-                    }}
-                    disabled={!isRunning}
-                >
+                <Button onClick={stop} disabled={!isRunning}>
                     Parar
                 </Button>
-                <Button onClick={handleReset} disabled={isRunning}>
+                <Button onClick={reset} disabled={isRunning}>
                     Reiniciar
                 </Button>
             </div>

@@ -27,15 +27,15 @@ const MP3_FILE = z.custom<File>((file) => {
     if (!isFile) return false
 
     return file.type == 'audio/mpeg'
-})
+}, 'Requerido')
 
 type NewMusicForm = z.infer<typeof NEW_MUSIC_FORM>
 const NEW_MUSIC_FORM = z.object({
-    title: z.string().min(1).max(255),
+    title: z.string().min(1, 'Requerido').max(255, 'Demasiado Largo'),
     blob: MP3_FILE,
 })
 
-export function AddMusicDialog() {
+export function AddMusicDialog({ isLoading }: { isLoading: boolean }) {
     const [open, setOpen] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -81,7 +81,7 @@ export function AddMusicDialog() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className="gap-2">
+                <Button className="gap-2" disabled={isLoading}>
                     <Plus className="h-4 w-4" />
                     Añadir Musica
                 </Button>

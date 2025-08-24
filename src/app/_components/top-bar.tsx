@@ -1,5 +1,5 @@
 import { Button } from '~/components/ui/button'
-import { Loader2, Pause, Play, Settings, SkipForward } from 'lucide-react'
+import { BarChart, Loader2, Pause, Play, Settings, SkipForward } from 'lucide-react'
 import { Slider } from '~/components/ui/slider'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
@@ -52,6 +52,11 @@ export function TopBar() {
                 </div>
             </div>
             <div className="flex justify-end gap-4">
+                <Button size="icon" asChild>
+                    <Link href="/stats">
+                        <BarChart />
+                    </Link>
+                </Button>
                 <Button size="icon" asChild>
                     <Link href="/settings">
                         <Settings />

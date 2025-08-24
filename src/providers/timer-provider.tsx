@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react'
+import { createContext, type ReactNode, useContext, useEffect, useRef } from 'react'
 import { createStore, type StoreApi } from 'zustand/vanilla'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
@@ -116,45 +116,29 @@ function createTimerStore() {
 
         // Actions
         setMode: (newMode) => {
-            const { intervalId } = get()
-            if (intervalId !== null) clearInterval(intervalId)
-            set({ mode: newMode, isRunning: false, intervalId: null })
+            const { individualMode, stop } = get()
+            stop()
+            set({ mode: newMode })
 
             if (newMode === 'infinite') {
                 set({
                     orderIndex: 0,
                     remainingSeconds: ORDER_SECONDS[0] ?? 25 * 60,
-                    // reset phase trackers
-                    phaseStartAt: null,
-                    phasePlannedSeconds: null,
-                    phaseType: null,
                 })
             } else {
-                const { individualMode } = get()
                 set({
                     remainingSeconds: MODE_TIMES_SECONDS[individualMode],
-                    // reset phase trackers
-                    phaseStartAt: null,
-                    phasePlannedSeconds: null,
-                    phaseType: null,
                 })
             }
         },
 
         setIndividualMode: (newIndividualMode) => {
-            const { intervalId, mode } = get()
-            if (intervalId !== null) clearInterval(intervalId)
-            set({ individualMode: newIndividualMode, isRunning: false, intervalId: null })
-
-            if (mode === 'individually') {
-                set({
-                    remainingSeconds: MODE_TIMES_SECONDS[newIndividualMode],
-                    // reset phase trackers
-                    phaseStartAt: null,
-                    phasePlannedSeconds: null,
-                    phaseType: null,
-                })
-            }
+            get().stop()
+            set({
+                individualMode: newIndividualMode,
+                mode: 'individually',
+                remainingSeconds: MODE_TIMES_SECONDS[newIndividualMode],
+            })
         },
 
         setRemainingSeconds: (seconds) => set({ remainingSeconds: seconds }),
@@ -203,7 +187,6 @@ function createTimerStore() {
 
         start: () => {
             const { isRunning, remainingSeconds } = get()
-            if (typeof window === 'undefined') return
             if (isRunning || remainingSeconds <= 0) return
 
             // Initialize phase trackers if this is a fresh start
@@ -263,30 +246,26 @@ function createTimerStore() {
                 })
             }
 
-            if (remainingSeconds <= 1) {
-                // Count the final second of this phase for session totals
-                addOneSecondToSessionTotals()
+            addOneSecondToSessionTotals()
 
-                // End current phase
-                get().stop()
-
-                if (mode === 'infinite') {
-                    const nextIndex = (orderIndex + 1) % ORDER_SECONDS.length
-                    const nextTime = ORDER_SECONDS[nextIndex] ?? 25 * 60
-                    set({ orderIndex: nextIndex, remainingSeconds: nextTime })
-
-                    if (typeof window !== 'undefined') {
-                        window.setTimeout(() => {
-                            get().start()
-                        }, 0)
-                    }
-                } else {
-                    set({ remainingSeconds: MODE_TIMES_SECONDS[individualMode] })
-                }
-            } else {
-                // Normal tick
+            if (remainingSeconds > 1) {
                 set({ remainingSeconds: remainingSeconds - 1 })
-                addOneSecondToSessionTotals()
+                return
+            }
+
+            // End current phase
+            get().stop()
+
+            if (mode === 'infinite') {
+                const nextIndex = (orderIndex + 1) % ORDER_SECONDS.length
+                const nextTime = ORDER_SECONDS[nextIndex] ?? 25 * 60
+                set({ orderIndex: nextIndex, remainingSeconds: nextTime })
+
+                window.setTimeout(() => {
+                    get().start()
+                }, 0)
+            } else {
+                set({ remainingSeconds: MODE_TIMES_SECONDS[individualMode] })
             }
         },
     }))
@@ -297,15 +276,87 @@ const TimerStoreContext = createContext<StoreApi<TimerStore> | null>(null)
 
 export function TimerProvider({ children }: { children: ReactNode }) {
     const storeRef = useRef<StoreApi<TimerStore> | null>(null)
+    const closedRef = useRef(false)
 
     if (!storeRef.current) {
         storeRef.current = createTimerStore()
     }
 
-    // Cleanup on unmount (stop any running interval)
+    // On mount: flush any pending phase captured during a previous close
+    useEffect(() => {
+        const key = 'timer:pendingPhase'
+        try {
+            const raw = localStorage.getItem(key)
+            if (raw) {
+                const payload = JSON.parse(raw) as {
+                    type: IndividualMode
+                    startedAt: number
+                    endedAt: number
+                    durationSec: number
+                }
+                void db.timerSessions.add({
+                    type: payload.type,
+                    startedAt: new Date(payload.startedAt),
+                    endedAt: new Date(payload.endedAt),
+                    durationSec: payload.durationSec,
+                })
+                localStorage.removeItem(key)
+            }
+        } catch {
+            // ignore errors
+        }
+    }, [])
+
+    // Persist on window close/tab hide by caching to localStorage synchronously
+    useEffect(() => {
+        const key = 'timer:pendingPhase'
+        const handlePersistOnClose = () => {
+            const s = storeRef.current?.getState()
+            if (!s) return
+            if (s.isRunning && s.phaseStartAt && s.phaseType) {
+                const now = Date.now()
+                const planned = s.phasePlannedSeconds ?? 0
+                let durationSec: number
+
+                if (s.remainingSeconds <= 1 && planned > 0) {
+                    durationSec = planned
+                } else {
+                    durationSec = Math.max(0, Math.floor((now - s.phaseStartAt) / 1000))
+                    if (planned > 0) durationSec = Math.min(durationSec, planned)
+                }
+
+                const payload = {
+                    type: s.phaseType,
+                    startedAt: s.phaseStartAt,
+                    endedAt: now,
+                    durationSec,
+                }
+
+                try {
+                    localStorage.setItem(key, JSON.stringify(payload))
+                } catch {
+                    // ignore storage errors
+                }
+
+                // Mark as closing to avoid double-persist from unmount cleanup
+                closedRef.current = true
+            }
+        }
+
+        window.addEventListener('pagehide', handlePersistOnClose)
+        window.addEventListener('beforeunload', handlePersistOnClose)
+        return () => {
+            window.removeEventListener('pagehide', handlePersistOnClose)
+            window.removeEventListener('beforeunload', handlePersistOnClose)
+        }
+    }, [])
+
+    // Cleanup on unmount (stop any running interval) unless we've already handled close
     useEffect(() => {
         return () => {
-            storeRef.current?.getState().stop()
+            if (!closedRef.current) {
+                storeRef.current?.getState().stop()
+            }
         }
     }, [])
 
