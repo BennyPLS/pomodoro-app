@@ -240,8 +240,13 @@ export default function Page() {
                                 orientation="left"
                                 tickFormatter={(v) => `${v}m`}
                                 width={40}
-                                allowDecimals={false}
-                                domain={[0, (_dataMin: number, dataMax: number) => Math.ceil((dataMax ?? 0) * 1.2)]}
+                                allowDecimals
+                                domain={[
+                                    0,
+                                    (max: number) => {
+                                        return Math.ceil((max ?? 0) * 1.2)
+                                    },
+                                ]}
                             />
                             <YAxis
                                 yAxisId="right"
@@ -252,7 +257,7 @@ export default function Page() {
                             />
                             <Tooltip
                                 formatter={(value: any, name: any) => {
-                                    if (name === '% Trabajo') return [`${Math.round(value)}%`, name]
+                                    if (name === '% Trabajo') return [`${Number(value).toFixed(2)}%`, name]
                                     // minutes -> readable
                                     const sec = Math.round(Number(value) * 60)
                                     return [formatDurationShort(sec), name === 'Trabajo' ? 'Trabajo' : 'Descanso']
