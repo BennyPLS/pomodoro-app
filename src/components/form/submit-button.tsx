@@ -1,19 +1,17 @@
-import { type MouseEventHandler } from 'react'
 import { Button } from '~/components/ui/button'
 import { Spinner } from '~/components/ui/spinner'
+import { useFormContext } from '~/hooks/use-app-form'
 
-export default function SubmitButton({
-    isLoading,
-    disabled,
-    onClick,
-}: {
-    isLoading: boolean
-    disabled?: boolean
-    onClick?: MouseEventHandler<HTMLButtonElement>
-}) {
+export default function SubmitButton() {
+    const form = useFormContext()
+
     return (
-        <Button className="mt-4" onClick={onClick} type="submit" disabled={isLoading || disabled}>
-            {isLoading ? <Spinner className="text-foreground" /> : <>Guardar</>}
-        </Button>
+        <form.Subscribe selector={(state): [boolean, boolean] => [state.isSubmitting, state.isValid]}>
+            {([isSubmitting, isValid]) => (
+                <Button className="mt-4" type="submit" disabled={isSubmitting || !isValid}>
+                    {isSubmitting ? <Spinner className="text-foreground" /> : <>Guardar</>}
+                </Button>
+            )}
+        </form.Subscribe>
     )
 }

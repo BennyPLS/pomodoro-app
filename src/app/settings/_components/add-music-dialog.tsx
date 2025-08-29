@@ -1,12 +1,5 @@
 'use client'
 import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { Form } from '~/components/ui/form'
-import SimpleFormTextInput from '~/components/form/simple-form-text-input'
-import SubmitButton from '~/components/form/submit-button'
-import SimpleFormField from '~/components/form/simple-form-field'
-import { Input } from '~/components/ui/input'
 import { Button } from '~/components/ui/button'
 import {
     Dialog,
@@ -18,9 +11,13 @@ import {
     DialogTrigger,
 } from '~/components/ui/dialog'
 import { Plus } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import db from '~/lib/db'
+import { handleOnSubmit } from '~/lib/form'
+import { Input } from '~/components/ui/input'
+import SubmitButton from '~/components/form/submit-button'
+import { useAppForm } from '~/hooks/use-app-form'
 
 const MP3_FILE = z.custom<File>((file) => {
     const isFile = file instanceof File
@@ -39,44 +36,39 @@ export function AddMusicDialog({ isLoading }: { isLoading: boolean }) {
     const [open, setOpen] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const form = useForm<NewMusicForm>({
-        resolver: zodResolver(NEW_MUSIC_FORM),
+    const form = useAppForm({
         defaultValues: {
             title: '',
+        } as NewMusicForm,
+        validators: {
+            onChange: NEW_MUSIC_FORM,
+        },
+        onSubmit: async ({ value }) => {
+            const last = await db.music.orderBy('order').last()
+
+            const next = last ? last.order + 1 : 1
+
+            // Add the new music with the next order value
+            const musicData = {
+                ...value,
+                order: next,
+            }
+
+            const title = await db.music.add(musicData)
+            toast.success(`Se ha guardado la musica: ${title}`)
+
+            form.reset()
+            fileInputRef.current!.value = ''
+            setOpen(false)
         },
     })
 
     useEffect(() => {
         if (!open) {
-            form.reset({ title: '' })
+            form.reset()
             if (fileInputRef.current) fileInputRef.current.value = ''
         }
     }, [form, open])
-
-    const onSubmit = async (data: NewMusicForm) => {
-        try {
-            // Get the highest order value
-            const allMusic = await db.music.toArray()
-            const highestOrder = allMusic.length > 0 ? Math.max(...allMusic.map((m) => m.order ?? 0)) : -1
-
-            // Add the new music with the next order value
-            const musicData = {
-                ...data,
-                order: highestOrder + 1,
-            }
-            const title = await db.music.add(musicData)
-
-            toast.success(`Se ha subido la musica: ${title}`)
-            form.reset()
-            fileInputRef.current!.value = ''
-            setOpen(false)
-        } catch {
-            form.setError('title', {
-                type: 'duplicate',
-                message: 'Titulo ya existe',
-            })
-        }
-    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -86,34 +78,44 @@ export function AddMusicDialog({ isLoading }: { isLoading: boolean }) {
                     Añadir Musica
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="text-center text-2xl font-bold">Añadir Musica</DialogTitle>
                     <DialogDescription>Sube archivos MP3 para tu colección de música.</DialogDescription>
                 </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <SimpleFormTextInput control={form.control} name="title" label="Titulo" />
-                        <SimpleFormField
-                            control={form.control}
-                            name="blob"
-                            label="Archivo"
-                            render={({ field }) => (
-                                <Input
-                                    ref={fileInputRef}
-                                    type="file"
-                                    accept="audio/mpeg"
-                                    onChange={(event) => {
-                                        field.onChange(event?.target?.files?.item(0))
-                                    }}
-                                />
+
+                <form.AppForm>
+                    <form onSubmit={handleOnSubmit(form)} className="space-y-6">
+                        <form.AppField
+                            validators={{
+                                onBlurAsync: async ({ value }) => {
+                                    const music = await db.music.get(value)
+                                    return music ? 'Titulo ya existe' : null
+                                },
+                            }}
+                            name="title"
+                        >
+                            {(field) => <field.FormTextInput label="Titulo" isRequired />}
+                        </form.AppField>
+                        <form.AppField name="blob">
+                            {(field) => (
+                                <field.FormField label="Archivo" isRequired>
+                                    <Input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept="audio/mpeg"
+                                        onChange={(event) => {
+                                            field.handleChange(event?.target?.files?.item(0)!)
+                                        }}
+                                    />
+                                </field.FormField>
                             )}
-                        />
+                        </form.AppField>
                         <DialogFooter>
-                            <SubmitButton isLoading={form.formState.isSubmitting} />
+                            <SubmitButton />
                         </DialogFooter>
                     </form>
-                </Form>
+                </form.AppForm>
             </DialogContent>
         </Dialog>
     )
