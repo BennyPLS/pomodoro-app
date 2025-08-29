@@ -5,8 +5,8 @@ import db from '~/lib/db'
 import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Button } from '~/components/ui/button'
-import Link from 'next/link'
-import { Home } from 'lucide-react'
+import { Undo2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 type DailyStat = {
     dateKey: string // yyyy-mm-dd
@@ -39,6 +39,8 @@ function formatDurationShort(totalSec: number): string {
 }
 
 export default function Page() {
+    const router = useRouter()
+
     const sessions = useLiveQuery(() => db.timerSessions.orderBy('startedAt').toArray())
 
     const daily = useMemo<DailyStat[]>(() => {
@@ -144,17 +146,17 @@ export default function Page() {
 
     return (
         <div className="mx-auto w-full max-w-6xl p-4 sm:p-6">
-            <header className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                    <h1 className="text-2xl font-semibold tracking-tight">Estadísticas</h1>
-                    <p className="text-muted-foreground">Trabajo, descanso, total por día y porcentaje de enfoque.</p>
+            <nav className="bg-background grid grid-cols-3 gap-4 p-4">
+                <div className="flex justify-start gap-4">
+                    <Button size="icon" onClick={() => router.back()}>
+                        <Undo2 />
+                    </Button>
                 </div>
-                <Button size="icon" asChild>
-                    <Link href="/">
-                        <Home />
-                    </Link>
-                </Button>
-            </header>
+
+                <h1 className="flex items-center justify-center gap-4 text-2xl">Estadísticas</h1>
+
+                <div className="flex justify-end gap-4"></div>
+            </nav>
 
             {/* Insights */}
             <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
