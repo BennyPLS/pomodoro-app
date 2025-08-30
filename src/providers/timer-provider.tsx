@@ -81,14 +81,14 @@ async function persistPhase(payload: {
     type: IndividualMode
     startedAt: number
     endedAt: number
-    durationSec: number
+    duration: number
 }) {
     try {
-        await db.timerSessions.add({
+        await db.sessions.add({
             type: payload.type,
             startedAt: new Date(payload.startedAt),
             endedAt: new Date(payload.endedAt),
-            durationSec: payload.durationSec,
+            duration: payload.duration,
         })
     } catch {
         // ignore persistence errors
@@ -149,23 +149,23 @@ function createTimerStore() {
             if (state.isRunning && state.phaseStartAt && state.phaseType) {
                 const now = Date.now()
                 const planned = state.phasePlannedSeconds ?? 0
-                let durationSec: number
+                let duration: number
 
                 // If we are stopping because the timer just hit the end, remainingSeconds <= 1,
                 // record the full planned duration; otherwise record elapsed wall time.
                 if (state.remainingSeconds <= 1 && planned > 0) {
-                    durationSec = planned
+                    duration = planned
                 } else {
-                    durationSec = Math.max(0, Math.floor((now - state.phaseStartAt) / 1000))
+                    duration = Math.max(0, Math.floor((now - state.phaseStartAt) / 1000))
                     // Cap to planned if available
-                    if (planned > 0) durationSec = Math.min(durationSec, planned)
+                    if (planned > 0) duration = Math.min(duration, planned)
                 }
 
                 void persistPhase({
                     type: state.phaseType,
                     startedAt: state.phaseStartAt,
                     endedAt: now,
-                    durationSec,
+                    duration,
                 })
             }
 
@@ -284,11 +284,11 @@ export function TimerProvider({ children }: { children: ReactNode }) {
                     endedAt: number
                     durationSec: number
                 }
-                void db.timerSessions.add({
+                void db.sessions.add({
                     type: payload.type,
                     startedAt: new Date(payload.startedAt),
                     endedAt: new Date(payload.endedAt),
-                    durationSec: payload.durationSec,
+                    duration: payload.durationSec,
                 })
                 localStorage.removeItem(PENDING_PHASE)
             }

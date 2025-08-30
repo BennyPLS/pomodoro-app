@@ -8,22 +8,23 @@ export interface Music {
     order: number
 }
 
-export interface TimerSession {
+export interface Sessions {
     id?: number
     type: 'work' | 'break' | 'longBreak'
     startedAt: Date
     endedAt: Date
-    durationSec: number
+    // seconds
+    duration: number
 }
 
 export const db = new Dexie('db') as Dexie & {
     music: EntityTable<Music, 'title'>
-    timerSessions: EntityTable<TimerSession, 'id'>
+    sessions: EntityTable<Sessions, 'id'>
 }
 
 db.version(1).stores({
     music: 'title, order',
-    timerSessions: '++id, startedAt, type',
+    sessions: '++id, startedAt, type',
 })
 
 export default db
