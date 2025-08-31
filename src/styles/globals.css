@@ -97,11 +97,6 @@
     --input: hsl(220 16% 80%);
     --ring: hsl(213 32% 52%);
 
-    --chart-1: hsl(213 32% 52%);
-    --chart-2: hsl(179 25% 65%);
-    --chart-3: hsl(311 20% 63%);
-    --chart-4: hsl(92 28% 65%);
-    --chart-5: hsl(354 42% 56%);
 
     --radius: 0.6rem;
 }
@@ -132,15 +127,9 @@
     --destructive: hsl(354 42% 56%);
     --destructive-foreground: hsl(219 28% 88%);
 
-    --border: hsl(220 13% 36%);
-    --input: hsl(220 13% 36%);
-    --ring: hsl(210 34% 63%);
-
-    --chart-1: hsl(210 34% 63%);
-    --chart-2: hsl(193 43% 67%);
-    --chart-3: hsl(179 25% 65%);
-    --chart-4: hsl(92 28% 65%);
-    --chart-5: hsl(354 42% 56%);
+    --border: oklch(0.459 0.028 264.249);
+    --input: oklch(0.459 0.028 264.249);
+    --ring: oklch(0.697 0.059 248.687);
 }
 
 @layer base {
@@ -158,28 +147,33 @@
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
+
     --color-card: var(--card);
     --color-card-foreground: var(--card-foreground);
+
     --color-popover: var(--popover);
     --color-popover-foreground: var(--popover-foreground);
+
     --color-primary: var(--primary);
     --color-primary-foreground: var(--primary-foreground);
+
     --color-secondary: var(--secondary);
     --color-secondary-foreground: var(--secondary-foreground);
+
     --color-muted: var(--muted);
     --color-muted-foreground: var(--muted-foreground);
+
     --color-accent: var(--accent);
     --color-accent-foreground: var(--accent-foreground);
+
     --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
+
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
+
+
     --radius-sm: calc(var(--radius) - 4px);
     --radius-md: calc(var(--radius) - 2px);
     --radius-lg: var(--radius);

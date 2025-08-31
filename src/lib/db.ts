@@ -8,7 +8,7 @@ export interface Music {
     order: number
 }
 
-export interface Sessions {
+export interface Session {
     id?: number
     type: 'work' | 'break' | 'longBreak'
     startedAt: Date
@@ -19,7 +19,7 @@ export interface Sessions {
 
 export const db = new Dexie('db') as Dexie & {
     music: EntityTable<Music, 'title'>
-    sessions: EntityTable<Sessions, 'id'>
+    sessions: EntityTable<Session, 'id'>
 }
 
 db.version(1).stores({
