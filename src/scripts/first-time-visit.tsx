@@ -1,77 +1,78 @@
-'use client'
 import { useEffect } from 'react'
-import { env } from '~/env'
-import db from '~/lib/db'
+import db from '@/lib/db'
 
 // Default song titles from the public folder
 const DEFAULT_SONGS = [
-    'a-cozy-day',
-    'cafe-theme',
-    'chill-lofi',
-    'close-study',
-    'mental-drive-lofi',
-    'night-coffee-shop',
-    'sunrise-meditation',
+  'a-cozy-day',
+  'cafe-theme',
+  'chill-lofi',
+  'close-study',
+  'mental-drive-lofi',
+  'night-coffee-shop',
+  'sunrise-meditation',
 ] as const
 
 // Map song filenames to human-readable titles
 const DEFAULT_SONG_TITLES: Record<(typeof DEFAULT_SONGS)[number], string> = {
-    'a-cozy-day': 'A Cozy Day',
-    'cafe-theme': 'Café Theme',
-    'chill-lofi': 'Chill Lo-Fi',
-    'close-study': 'Close Study',
-    'mental-drive-lofi': 'Mental Drive Lo-Fi',
-    'night-coffee-shop': 'Night Coffee Shop',
-    'sunrise-meditation': 'Sunrise Meditation',
+  'a-cozy-day': 'A Cozy Day',
+  'cafe-theme': 'Café Theme',
+  'chill-lofi': 'Chill Lo-Fi',
+  'close-study': 'Close Study',
+  'mental-drive-lofi': 'Mental Drive Lo-Fi',
+  'night-coffee-shop': 'Night Coffee Shop',
+  'sunrise-meditation': 'Sunrise Meditation',
 }
 
 export async function insertDefaultSongs() {
-    // Check if we already have songs in the database
-    const count = await db.music.count()
+  // Check if we already have songs in the database
+  const count = await db.music.count()
 
-    // Only add default songs if the database is empty
-    if (count === 0) {
-        console.log('Inserting default songs into database...')
+  // Only add default songs if the database is empty
+  if (count === 0) {
+    console.log('Inserting default songs into database...')
 
-        for (let i = 0; i < DEFAULT_SONGS.length; i++) {
-            const songId = DEFAULT_SONGS[i]!
-            const songTitle = DEFAULT_SONG_TITLES[songId]
-            const songPath = `music/${songId}.mp3`
-            try {
-                // Fetch the MP3 file
-                console.log(`Loading ${songId}`)
+    for (let i = 0; i < DEFAULT_SONGS.length; i++) {
+      const songId = DEFAULT_SONGS[i]
+      const songTitle = DEFAULT_SONG_TITLES[songId]
+      const songPath = `music/${songId}.mp3`
+      try {
+        // Fetch the MP3 file
+        console.log(`Loading ${songId}`)
 
-                const response = await fetch(songPath)
-                if (!response.ok) throw new Error(`Failed to fetch ${songPath}`)
-
-                const blob = await response.blob()
-                await db.music.add({
-                    title: songTitle,
-                    blob: blob,
-                    order: i,
-                })
-
-                console.log(`Added default song: ${songTitle}`)
-            } catch (error) {
-                console.error(`Error adding song ${songTitle}:`, error)
-            }
+        const response = await fetch(songPath)
+        if (!response.ok) {
+          console.error(`Failed to fetch ${songPath}`)
+          continue
         }
 
-        console.log('Default songs added successfully!')
-    } else {
-        console.log('Database already contains songs, skipping default song insertion.')
+        const blob = await response.blob()
+        await db.music.add({
+          title: songTitle,
+          blob: blob,
+          order: i,
+        })
+
+        console.log(`Added default song: ${songTitle}`)
+      } catch (error) {
+        console.error(`Error adding song ${songTitle}:`, error)
+      }
     }
+
+    console.log('Default songs added successfully!')
+  } else {
+    console.log('Database already contains songs, skipping default song insertion.')
+  }
 }
 
 export default function FirstTimeVisitScript() {
-    useEffect(() => {
-        const isFirstTime = !Boolean(localStorage.getItem('visited'))
-        if (isFirstTime) {
-            insertDefaultSongs().then(() => {
-                localStorage.setItem('visited', 'true')
-            })
-        }
-    }, [])
+  useEffect(() => {
+    const isFirstTime = !localStorage.getItem('visited')
+    if (isFirstTime) {
+      insertDefaultSongs().then(() => {
+        localStorage.setItem('visited', 'true')
+      })
+    }
+  }, [])
 
-    return null
+  return null
 }

@@ -1,30 +1,29 @@
-import 'client-only'
-
-import Dexie, { type EntityTable } from 'dexie'
+import Dexie from 'dexie'
+import type { EntityTable } from 'dexie'
 
 export interface Music {
-    title: string
-    blob: Blob
-    order: number
+  title: string
+  blob: Blob
+  order: number
 }
 
 export interface Session {
-    id?: number
-    type: 'work' | 'break' | 'longBreak'
-    startedAt: Date
-    endedAt: Date
-    // seconds
-    duration: number
+  id?: number
+  type: 'work' | 'break' | 'longBreak'
+  startedAt: Date
+  endedAt: Date
+  // seconds
+  duration: number
 }
 
 export const db = new Dexie('db') as Dexie & {
-    music: EntityTable<Music, 'title'>
-    sessions: EntityTable<Session, 'id'>
+  music: EntityTable<Music, 'title'>
+  sessions: EntityTable<Session, 'id'>
 }
 
 db.version(1).stores({
-    music: 'title, order',
-    sessions: '++id, startedAt, type',
+  music: 'title, order',
+  sessions: '++id, startedAt, type',
 })
 
 export default db
