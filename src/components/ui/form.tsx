@@ -1,12 +1,11 @@
 import { Slot } from '@radix-ui/react-slot'
-import React from 'react'
 import { useStore } from '@tanstack/react-form'
 import type * as LabelPrimitive from '@radix-ui/react-label'
 
 import type { ComponentProps } from 'react'
-import { cn } from '@/lib/utils'
 import { Label } from '@/components/ui/label'
 import { useFieldContext } from '@/hooks/use-app-form'
+import { cn } from '@/lib/utils'
 
 const FormItem = ({ ref, className, ...props }: ComponentProps<'div'>) => {
   return <div ref={ref} className={cn('flex w-full flex-col gap-2', className)} {...props} />
@@ -62,4 +61,4 @@ const FormMessage = ({ ref, className, children, ...props }: ComponentProps<'p'>
 
 FormMessage.displayName = 'FormMessage'
 
-export { FormItem, FormLabel, FormControl, FormDescription, FormMessage }
+export { FormControl, FormDescription, FormItem, FormLabel, FormMessage }

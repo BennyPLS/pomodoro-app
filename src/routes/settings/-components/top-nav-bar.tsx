@@ -1,5 +1,5 @@
-import { Undo2 } from 'lucide-react'
 import { useRouter } from '@tanstack/react-router'
+import { Undo2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export function TopNavBar() {

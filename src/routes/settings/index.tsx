@@ -1,14 +1,14 @@
+import { createFileRoute } from '@tanstack/react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useMemo } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import db from '@/lib/db'
-import { Spinner } from '@/components/ui/spinner'
-import { AddMusicDialog } from '@/routes/settings/-components/add-music-dialog'
-import { TopNavBar } from '@/routes/settings/-components/top-nav-bar'
-import { MusicItem } from '@/routes/settings/-components/music-item'
-import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
+import { Spinner } from '@/components/ui/spinner'
+import { Switch } from '@/components/ui/switch'
 import { useLocalStorage } from '@/hooks/use-local-storage'
+import db from '@/lib/db'
+import { AddMusicDialog } from '@/routes/settings/-components/add-music-dialog'
+import { MusicItem } from '@/routes/settings/-components/music-item'
+import { TopNavBar } from '@/routes/settings/-components/top-nav-bar'
 
 export const Route = createFileRoute('/settings/')({
   component: Page,

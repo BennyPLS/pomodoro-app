@@ -1,9 +1,9 @@
-import { useState } from 'react'
 import { ChartBar, Dumbbell, EyeClosed, Timer as TimerIcon, Volume, Volume1, Volume2, VolumeX } from 'lucide-react'
-import useMusicPlayer from '@/providers/music-provider'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Slider } from '@/components/ui/slider'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
+import { Slider } from '@/components/ui/slider'
+import useMusicPlayer from '@/providers/music-provider'
 import useTimer from '@/providers/timer-provider'
 
 export function BottomBar() {

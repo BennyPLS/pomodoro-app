@@ -1,7 +1,9 @@
-import { z } from 'zod'
 import { Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { z } from 'zod'
+import { Form } from '@/components/form/form.tsx'
+import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -11,10 +13,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import db from '@/lib/db'
 import { useAppForm } from '@/hooks/form.ts'
-import { Form } from '@/components/form/form.tsx'
+import db from '@/lib/db'
 
 const MP3_FILE = z.custom<File>((file) => {
   const isFile = file instanceof File

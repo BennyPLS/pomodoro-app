@@ -1,10 +1,10 @@
-import { useMemo } from 'react'
 import { ArrowDown, ArrowUp, Pause, Play, Trash2, Volume, Volume1, Volume2, VolumeX } from 'lucide-react'
+import { useMemo } from 'react'
 import type { Music } from '@/lib/db'
-import { useAudioPlayer } from '@/hooks/use-audio-player'
-import db from '@/lib/db'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
+import { useAudioPlayer } from '@/hooks/use-audio-player'
+import db from '@/lib/db'
 
 interface MusicItemProps {
   music: Music

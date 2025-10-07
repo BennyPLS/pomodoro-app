@@ -1,13 +1,13 @@
-import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { createFileRoute } from '@tanstack/react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useMemo } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { TopNavBar } from './-components/top-nav-bar'
-import { formatMinutes, formatPercentage, formatSeconds } from './-lib/utils'
+import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { BadgeStat } from './-components/badge-stat'
 import { InsightCard } from './-components/insight-card'
-import { useInsights } from './-lib/use-insights'
+import { TopNavBar } from './-components/top-nav-bar'
 import { useDaily } from './-lib/use-daily'
+import { useInsights } from './-lib/use-insights'
+import { formatMinutes, formatPercentage, formatSeconds } from './-lib/utils'
 import db from '@/lib/db'
 
 export const Route = createFileRoute('/stats/')({

@@ -1,9 +1,9 @@
 import { useEffect, useRef } from 'react'
 import type { RefObject } from 'react'
 import { Button } from '@/components/ui/button'
-import useTimer from '@/providers/timer-provider'
-import useMusicPlayer from '@/providers/music-provider'
 import { useLocalStorage } from '@/hooks/use-local-storage'
+import useMusicPlayer from '@/providers/music-provider'
+import useTimer from '@/providers/timer-provider'
 
 // --- Constants ---
 const DIGIT_HEIGHT_PX = 128 // Matches h-30 (120 px) + gap-2 (8 px) in CSS

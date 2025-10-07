@@ -1,9 +1,9 @@
 import { useStore } from '@tanstack/react-form'
 import type { ComponentProps } from 'react'
-import { useFieldContext } from '@/hooks/form'
-import { Label } from '@/components/ui/label'
-import { Input as ShadcnInput } from '@/components/ui/input'
 import { ErrorMessages } from '@/components/form/error-messages'
+import { Input as ShadcnInput } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useFieldContext } from '@/hooks/form'
 
 export function FileInput({
   label,
