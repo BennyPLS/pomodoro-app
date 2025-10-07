@@ -1,9 +1,9 @@
 import { Moon, Sun, SunMoon } from 'lucide-react'
-import type { Theme } from '@/providers/theme-provider.tsx'
+import type { Theme } from '@/providers/theme-provider'
 import type { LucideProps } from 'lucide-react'
 import type { ForwardRefExoticComponent, RefAttributes } from 'react'
 import { Button } from '@/components/ui/button'
-import { useTheme } from '@/providers/theme-provider.tsx'
+import { useTheme } from '@/providers/theme-provider'
 
 type Icon = ForwardRefExoticComponent<Omit<LucideProps, 'ref'> & RefAttributes<SVGSVGElement>>
 

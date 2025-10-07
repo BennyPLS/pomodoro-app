@@ -1,7 +1,7 @@
 import { ScriptOnce } from '@tanstack/react-router'
 import { createContext, use, useCallback, useEffect, useMemo } from 'react'
 import type { ReactNode } from 'react'
-import { useLocalStorage } from '@/hooks/use-local-storage.ts'
+import { useLocalStorage } from '@/hooks/use-local-storage'
 
 export type Theme = 'dark' | 'light' | 'system'
 const MEDIA = '(prefers-color-scheme: dark)'
@@ -80,7 +80,7 @@ export function ThemeProvider({
       theme,
       setTheme,
     }),
-    [theme],
+    [setTheme, theme],
   )
 
   return (

@@ -22,6 +22,7 @@ export function FileInput({
         {label}
       </Label>
       <ShadcnInput
+        placeholder={placeholder}
         type="file"
         accept="audio/mpeg"
         onChange={(event) => {

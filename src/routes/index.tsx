@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { BottomBar } from '@/routes/-components/bottom-bar.tsx'
-import { Timer } from '@/routes/-components/timer.tsx'
-import { TopBar } from '@/routes/-components/top-bar.tsx'
-import FirstTimeVisitScript from '@/scripts/first-time-visit.tsx'
+import { BottomBar } from '@/routes/-components/bottom-bar'
+import { Timer } from '@/routes/-components/timer'
+import { TopBar } from '@/routes/-components/top-bar'
+import FirstTimeVisitScript from '@/scripts/first-time-visit'
 
 export const Route = createFileRoute('/')({
   component: App,
