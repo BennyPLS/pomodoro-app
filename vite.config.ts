@@ -24,8 +24,7 @@ export default defineConfig({
         start_url: '/pomodoro-app/',
         display: 'standalone',
         background_color: '#4d576a',
-        theme_color: '#5d81ac',
-        lang: 'en',
+        theme_color: '#4d576a',
         orientation: 'portrait',
         categories: ['productivity', 'utilities', 'work', 'timer'],
         icons: [
@@ -48,15 +47,6 @@ export default defineConfig({
             type: 'image/png',
             label: 'Mobile view',
             platform: 'narrow',
-          },
-        ],
-        shortcuts: [
-          {
-            name: 'View Stats',
-            short_name: 'Stats',
-            description: 'See your productivity statistics',
-            url: '/pomodoro-app/stats',
-            icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }],
           },
         ],
         related_applications: [],
