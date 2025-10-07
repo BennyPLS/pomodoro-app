@@ -4,6 +4,7 @@ node_modules
 # production
 dist
 dist-ssr
+dev-dist
 
 # misc
 .DS_Store
