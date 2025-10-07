@@ -28,6 +28,9 @@ jobs:
         with:
           node-version: lts/*
           cache: 'pnpm'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
       - name: Install dependencies
         run: pnpm ci
       - name: Build
