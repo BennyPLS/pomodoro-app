@@ -3,6 +3,7 @@ import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { routeTree } from '@/routeTree.gen'
 import './styles.css'
+import { env } from '@/env'
 
 // Create a new router instance
 const router = createRouter({
@@ -12,7 +13,7 @@ const router = createRouter({
   scrollRestoration: true,
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
-  basepath: '/pomodoro-app/',
+  basepath: env.VITE_ENV === 'development' ? '' : '/pomodoro-app/',
 })
 
 // Register the router instance for type safety

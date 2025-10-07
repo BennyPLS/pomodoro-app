@@ -31,6 +31,13 @@ jobs:
         with:
           node-version: lts/*
           cache: 'pnpm'
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
       - name: Install dependencies
         run: pnpm i --frozen-lockfile
       - name: Build

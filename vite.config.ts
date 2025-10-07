@@ -7,7 +7,7 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: '/pomodoro-app/',
+  base: process.env.VITE_ENV === 'development' ? '' : '/pomodoro-app/',
   preview: { allowedHosts: true },
   server: { port: 3000 },
   plugins: [
@@ -17,56 +17,54 @@ export default defineConfig({
     tsconfigPaths(),
     VitePWA({
       registerType: 'autoUpdate',
-      devOptions: {
-        enabled: true,
-      },
       manifest: {
+        name: 'Pomodoro App',
+        short_name: 'Pomodoro',
+        description: 'A Pomodoro timer app to boost your productivity.',
+        start_url: '/pomodoro-app/',
+        display: 'standalone',
+        background_color: '#4d576a',
+        theme_color: '#5d81ac',
+        lang: 'en',
+        orientation: 'portrait',
+        categories: ['productivity', 'utilities', 'work', 'timer'],
         icons: [
-          {
-            src: 'pwa-64x64.png',
-            sizes: '64x64',
-            type: 'image/png',
-          },
-          {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-          {
-            src: 'maskable-icon-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'maskable',
-          },
+          { src: 'pwa-64x64.png', sizes: '64x64', type: 'image/png' },
+          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'maskable-icon-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
         screenshots: [
           {
             src: 'screenshot-desktop.png',
             sizes: '1053x593',
             type: 'image/png',
-            form_factor: 'wide',
+            label: 'Desktop view',
+            platform: 'wide',
           },
           {
             src: 'screenshot-mobile.png',
             sizes: '406x895',
             type: 'image/png',
-            form_factor: 'narrow',
-          },
-          {
-            src: 'screenshot-mobile.png',
-            sizes: '406x895',
-            type: 'image/png',
+            label: 'Mobile view',
+            platform: 'narrow',
           },
         ],
+        shortcuts: [
+          {
+            name: 'View Stats',
+            short_name: 'Stats',
+            description: 'See your productivity statistics',
+            url: '/pomodoro-app/stats',
+            icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }],
+          },
+        ],
+        related_applications: [],
+        prefer_related_applications: false,
       },
       workbox: {
         globPatterns: ['**/*'],
-        maximumFileSizeToCacheInBytes: 30000000,
+        maximumFileSizeToCacheInBytes: 30_000_000,
       },
     }),
   ],
