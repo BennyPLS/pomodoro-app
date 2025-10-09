@@ -8,8 +8,10 @@ import { TimerProvider } from '@/providers/timer-provider'
 
 export const Route = createRootRoute({
   head: () => ({
-    title: 'Pomodoro',
     meta: [
+      {
+        title: 'Pomodoro',
+      },
       { charSet: 'UTF-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
       { property: 'og:title', content: 'Pomodoro' },
