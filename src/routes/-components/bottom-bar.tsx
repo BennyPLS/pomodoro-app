@@ -31,7 +31,7 @@ export function BottomBar() {
           max={1}
           step={0.01}
           onValueChange={(value) => setVolume(value[0])}
-          className="sm:w-56"
+          className="sm:w-80"
         />
       </div>
       {/* Session Statistics */}
