@@ -7,7 +7,7 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
-  base: process.env.VITE_ENV === 'development' ? '' : '/pomodoro-app/',
+  base: process.env.VITE_ENV !== 'production' ? '' : '/pomodoro-app/',
   preview: { allowedHosts: true },
   server: { port: 3000 },
   plugins: [
