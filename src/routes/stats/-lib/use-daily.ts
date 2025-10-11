@@ -1,10 +1,10 @@
 import { useMemo } from 'react'
+import { DateTime } from 'luxon'
 import type { Session } from '@/lib/db'
-import { fromDateKey, toDateKey } from '@/routes/stats/-lib/utils'
 
 export type DailyStat = {
-  // yyyy-mm-dd
-  dateKey: string
+  // actual DateTime for the day (start of day)
+  date: DateTime<true>
   // localized date (e.g. 'Jan 5')
   label: string
   // seconds (recorded work)
@@ -13,17 +13,8 @@ export type DailyStat = {
   rest: number
   // seconds (recorded total)
   recorded: number
-  // seconds (not recorded)
-  idle: number
-  // Work as % of the full day (0..100).
+  // Work as % of the recorded time
   workPercentage: number
-}
-
-export const DAY_IN_SECONDS = 24 * 60 * 60
-
-// Type guard for future extensibility
-function isWorkSession(s: Session): boolean {
-  return s.type === 'work'
 }
 
 /**
@@ -35,12 +26,11 @@ export function useDaily(sessions: Array<Session> | null | undefined) {
   return useMemo<Array<DailyStat>>(() => {
     if (!sessions || sessions.length === 0) return []
 
-    // Aggregate by dateKey
     const byDate = sessions.reduce<Map<string, { work: number; rest: number }>>((map, session) => {
-      const key = toDateKey(new Date(session.startedAt))
+      const key = DateTime.fromJSDate(session.startedAt).startOf('day').toISODate()!
       const bucket = map.get(key) ?? { work: 0, rest: 0 }
 
-      if (isWorkSession(session)) {
+      if (session.type === 'work') {
         bucket.work += session.duration
       } else {
         bucket.rest += session.duration
@@ -51,32 +41,36 @@ export function useDaily(sessions: Array<Session> | null | undefined) {
       return map
     }, new Map())
 
-    // Sort keys chronologically
-    const sorted = Array.from(byDate.keys())
-      .map((k) => ({ key: k, time: fromDateKey(k).getTime() }))
-      .sort((a, b) => a.time - b.time)
+    // Determine min and max dates from keys
+    const keys = Array.from(byDate.keys())
+    if (keys.length === 0) return []
 
-    return sorted.map(({ key: dateKey }) => {
-      const { work, rest } = byDate.get(dateKey)!
+    const dateTimes = keys.map((k) => DateTime.fromISO(k) as DateTime<true>)
+    const min = DateTime.min(...dateTimes)!.startOf('day')
+    const max = DateTime.max(...dateTimes)!.startOf('day')
 
+    // Iterate from min to max inclusive and fill missing days with defaults
+    const result: Array<DailyStat> = []
+    for (let cursor = min; cursor <= max; cursor = cursor.plus({ days: 1 })) {
+      const dateKey = cursor.toISODate()
+      const bucket = byDate.get(dateKey) ?? { work: 0, rest: 0 }
+      const work = bucket.work
+      const rest = bucket.rest
       const recorded = work + rest
-      const idle = Math.max(0, DAY_IN_SECONDS - recorded)
-      const workPercentage = (work / DAY_IN_SECONDS) * 100
+      const workPercentage = recorded === 0 ? 0 : (work / recorded) * 100
 
-      const label = fromDateKey(dateKey).toLocaleDateString(undefined, {
-        month: 'short',
-        day: 'numeric',
-      })
+      const label = cursor.toLocaleString({ month: 'short', day: 'numeric' })
 
-      return {
-        dateKey,
+      result.push({
+        date: cursor,
         label,
         work,
         rest,
         recorded,
-        idle,
         workPercentage,
-      }
-    })
+      })
+    }
+
+    return result
   }, [sessions])
 }
