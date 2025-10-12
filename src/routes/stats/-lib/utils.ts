@@ -1,20 +1,12 @@
-export function toDateKey(d: Date): string {
-  const y = d.getFullYear()
-  const m = String(d.getMonth() + 1).padStart(2, '0')
-  const day = String(d.getDate()).padStart(2, '0')
-  return `${y}-${m}-${day}`
-}
-
-export function fromDateKey(key: string): Date {
-  const [y, m, d] = key.split('-').map(Number)
-  return new Date(y, m - 1, d)
-}
+import { Duration } from 'luxon'
 
 export function formatSeconds(sec: number): string {
-  const h = Math.floor(sec / 3600)
-  const m = Math.floor((sec % 3600) / 60)
-  const s = Math.floor(sec % 60)
-  const d = Math.floor(h / 24)
+  const dur = Duration.fromObject({ seconds: sec }).shiftTo('days', 'hours', 'minutes', 'seconds').toObject()
+
+  const d = Math.floor(dur.days ?? 0)
+  const h = Math.floor(dur.hours ?? 0)
+  const m = Math.floor(dur.minutes ?? 0)
+  const s = Math.floor(dur.seconds ?? 0)
 
   if (d > 0) return `${d}d ${h}h ${m > 0 ? `${m}m` : ''}`
   if (h > 0) return `${h}h ${m}m ${s}s`
@@ -23,9 +15,11 @@ export function formatSeconds(sec: number): string {
 }
 
 export function formatMinutes(min: number): string {
-  const h = Math.floor(min / 60)
-  const m = Math.floor(min % 60)
-  const d = Math.floor(h / 24)
+  const dur = Duration.fromObject({ minutes: min }).shiftTo('days', 'hours', 'minutes').toObject()
+
+  const d = Math.floor(dur.days ?? 0)
+  const h = Math.floor(dur.hours ?? 0)
+  const m = Math.floor(dur.minutes ?? 0)
 
   if (d > 0) return `${d}d ${h}h ${m > 0 ? `${m}m` : ''}`
   if (h > 0) return `${h}h ${m > 0 ? `${m}m` : ''}`

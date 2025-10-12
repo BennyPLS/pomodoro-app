@@ -13,7 +13,7 @@ function App() {
     <div className="flex h-svh w-screen flex-col">
       <FirstTimeVisitScript />
       <TopBar />
-      <main className="flex grow items-center justify-center gap-4">
+      <main className="flex grow items-center justify-center gap-4 py-4">
         <Timer />
       </main>
       <BottomBar />

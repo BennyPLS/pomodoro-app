@@ -1,5 +1,6 @@
 import Dexie from 'dexie'
 import type { EntityTable } from 'dexie'
+import type { IndividualMode } from '@/providers/timer-provider'
 
 export interface Music {
   title: string
@@ -9,11 +10,13 @@ export interface Music {
 
 export interface Session {
   id?: number
-  type: 'work' | 'break' | 'longBreak'
+  uuid: string
+  type: IndividualMode
   startedAt: Date
   endedAt: Date
   // seconds
   duration: number
+  completed: boolean
 }
 
 export const db = new Dexie('db') as Dexie & {

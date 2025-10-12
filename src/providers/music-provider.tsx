@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { createContext, useContext, useEffect, useMemo, useRef } from 'react'
+import { createContext, use, useEffect, useMemo, useRef } from 'react'
 import { useStore } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { useShallow } from 'zustand/react/shallow'
@@ -268,8 +268,8 @@ export function MusicPlayerProvider({ children }: { children: ReactNode }) {
   return <MusicPlayerStoreContext.Provider value={store}>{children}</MusicPlayerStoreContext.Provider>
 }
 
-export default function useMusicPlayer<T>(selector: (s: MusicPlayerStore) => T): T {
-  const store = useContext(MusicPlayerStoreContext)
+export function useMusicPlayer<T>(selector: (s: MusicPlayerStore) => T): T {
+  const store = use(MusicPlayerStoreContext)
   if (!store) throw new Error('useMusicPlayerSelector must be used within a MusicPlayerProvider')
   return useStore(store, useShallow(selector))
 }
