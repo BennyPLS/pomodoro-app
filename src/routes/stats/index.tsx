@@ -2,6 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Bar, CartesianGrid, ComposedChart, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { useMemo } from 'react'
+import { DateTime } from 'luxon'
 import { BadgeStat } from './-components/badge-stat'
 import { InsightCard } from './-components/insight-card'
 import { TopNavBar } from './-components/top-nav-bar'
@@ -28,6 +29,19 @@ function Page() {
       {/* Insights */}
       <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <InsightCard title="Racha de días con trabajo" value={insights.streak.toString()} hint="Consecutivos" />
+        <InsightCard
+          title="Tendencia semanal"
+          value={`${insights.weekWorkChange >= 0 ? '+' : '-'}${formatSeconds(Math.abs(insights.weekWorkChange))}`}
+          hint={`${formatPercentage(insights.weekWorkChangePct)} vs semana anterior`}
+        />
+
+        <InsightCard title="Semana anterior" value={formatSeconds(insights.prevWeekWork)} hint="Trabajo" />
+
+        <InsightCard
+          title="Día con más Pomodoros (semana)"
+          value={insights.bestDayCompleted.toString()}
+          hint={insights.bestDay ? insights.bestDay.toLocaleString(DateTime.DATE_MED) : '—'}
+        />
       </section>
 
       {/* This week summary */}

@@ -15,6 +15,8 @@ export type DailyStat = {
   recorded: number
   // Work as % of the recorded time
   workPercentage: number
+  // Completed Work Pomodoros
+  completed: number
 }
 
 /**
@@ -26,12 +28,13 @@ export function useDaily(sessions: Array<Session> | null | undefined) {
   return useMemo<Array<DailyStat>>(() => {
     if (!sessions || sessions.length === 0) return []
 
-    const byDate = sessions.reduce<Map<string, { work: number; rest: number }>>((map, session) => {
-      const key = DateTime.fromJSDate(session.startedAt).startOf('day').toISODate()!
-      const bucket = map.get(key) ?? { work: 0, rest: 0 }
+    const byDate = sessions.reduce<Map<string, { work: number; rest: number; completed: number }>>((map, session) => {
+      const key = DateTime.fromJSDate(session.startedAt).toISODate()!
+      const bucket = map.get(key) ?? { work: 0, rest: 0, completed: 0 }
 
       if (session.type === 'work') {
         bucket.work += session.duration
+        if (session.completed) bucket.completed++
       } else {
         bucket.rest += session.duration
       }
@@ -46,14 +49,14 @@ export function useDaily(sessions: Array<Session> | null | undefined) {
     if (keys.length === 0) return []
 
     const dateTimes = keys.map((k) => DateTime.fromISO(k) as DateTime<true>)
-    const min = DateTime.min(...dateTimes)!.startOf('day')
-    const max = DateTime.max(...dateTimes)!.startOf('day')
+    const min = DateTime.min(...dateTimes)!
+    const max = DateTime.max(...dateTimes)!
 
     // Iterate from min to max inclusive and fill missing days with defaults
     const result: Array<DailyStat> = []
     for (let cursor = min; cursor <= max; cursor = cursor.plus({ days: 1 })) {
       const dateKey = cursor.toISODate()
-      const bucket = byDate.get(dateKey) ?? { work: 0, rest: 0 }
+      const bucket = byDate.get(dateKey) ?? { work: 0, rest: 0, completed: 0 }
       const work = bucket.work
       const rest = bucket.rest
       const recorded = work + rest
@@ -68,6 +71,7 @@ export function useDaily(sessions: Array<Session> | null | undefined) {
         rest,
         recorded,
         workPercentage,
+        completed: bucket.completed,
       })
     }
 
