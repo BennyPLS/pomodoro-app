@@ -1,9 +1,10 @@
 import { useEffect, useRef } from 'react'
 import type { RefObject } from 'react'
+import type { IndividualMode } from '@/providers/timer-provider'
 import { Button } from '@/components/ui/button'
 import { useLocalStorage } from '@/hooks/use-local-storage'
-import useMusicPlayer from '@/providers/music-provider'
-import useTimer from '@/providers/timer-provider'
+import { useMusicPlayer } from '@/providers/music-provider'
+import useTimer, { getCurrentInfinityPhase } from '@/providers/timer-provider'
 
 // --- Constants ---
 const DIGIT_HEIGHT_PX = 128 // Matches h-30 (120 px) + gap-2 (8 px) in CSS
@@ -38,6 +39,17 @@ const getDigitsFromSeconds = (
   return { mt, mu, st, su }
 }
 
+function phaseToText(phase: IndividualMode) {
+  switch (phase) {
+    case 'break':
+      return 'Descanso'
+    case 'work':
+      return 'Trabajo'
+    case 'longBreak':
+      return 'Descanso Largo'
+  }
+}
+
 // --- Timer Component ---
 export function Timer() {
   const [pomodoroSmartMusic] = useLocalStorage('pomodoro-smart-music', true)
@@ -53,9 +65,18 @@ export function Timer() {
 
   const [play, pause] = useMusicPlayer((store) => [store.play, store.pause])
 
-  // --- Get state and actions from hook ---
-  const { mode, individualMode, remainingSeconds, isRunning, setMode, setIndividualMode, start, stop, reset } =
-    useTimer((store) => store)
+  const {
+    mode,
+    individualMode,
+    remainingSeconds,
+    isRunning,
+    orderIndex,
+    setMode,
+    setIndividualMode,
+    start,
+    stop,
+    reset,
+  } = useTimer((store) => store)
 
   useEffect(() => {
     if (!pomodoroSmartMusic) return
@@ -110,7 +131,7 @@ export function Timer() {
       {/* Individual Mode Selection (always reserve space but conditionally show content) */}
       <div className="mt-2 flex h-9 items-center">
         {/* Fixed height container */}
-        {mode === 'individually' && (
+        {mode === 'individually' ? (
           <div className="flex gap-4">
             <Button
               onClick={() => setIndividualMode('work')}
@@ -131,6 +152,8 @@ export function Timer() {
               Descanso Largo
             </Button>
           </div>
+        ) : (
+          <div>Fase: {phaseToText(getCurrentInfinityPhase(orderIndex))}</div>
         )}
       </div>
 

@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
 import { Slider } from '@/components/ui/slider'
-import useMusicPlayer from '@/providers/music-provider'
+import { useMusicPlayer } from '@/providers/music-provider'
 import useTimer from '@/providers/timer-provider'
 
 export function BottomBar() {
@@ -41,7 +41,11 @@ export function BottomBar() {
 }
 
 function SessionDrawerStatistics() {
-  const [total, work, rest] = useTimer((store) => [store.sessionTotalSec, store.sessionWorkSec, store.sessionRestSec])
+  const [total, work, rest] = useTimer((store) => [
+    store.browserSessionTotalSec,
+    store.browserSessionWorkSec,
+    store.browserSessionRestSec,
+  ])
 
   return (
     <Drawer>

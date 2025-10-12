@@ -3,7 +3,7 @@ import { BarChart, Pause, Play, Settings, SkipForward } from 'lucide-react'
 import ThemeSelector from '@/components/theme-selector'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
-import useMusicPlayer from '@/providers/music-provider'
+import { useMusicPlayer } from '@/providers/music-provider'
 
 export function TopBar() {
   const [next, play, pause, music, progress, duration, isPlaying, seek] = useMusicPlayer((store) => [

@@ -1,15 +1,16 @@
-import { createContext, useContext, useEffect, useRef } from 'react'
+import { createContext, use, useEffect, useRef } from 'react'
 import { useStore } from 'zustand'
 import { useShallow } from 'zustand/react/shallow'
 import { createStore } from 'zustand/vanilla'
+import { v7 } from 'uuid'
+import { DateTime } from 'luxon'
 import type { StoreApi } from 'zustand/vanilla'
 import type { ReactNode } from 'react'
-// Add: db for persisting timer sessions
 import db from '@/lib/db'
 
 // Types
-type TimerMode = 'infinite' | 'individually'
-type IndividualMode = 'work' | 'break' | 'longBreak'
+export type TimerMode = 'infinite' | 'individually'
+export type IndividualMode = 'work' | 'break' | 'longBreak'
 
 // Constants
 const TWENTY_FIVE_MINUTES = 25 * 60
@@ -25,7 +26,7 @@ const ORDER_SECONDS = [
   FIVE_MINUTES,
   TWENTY_FIVE_MINUTES,
   THIRTY,
-]
+] as const
 
 const MODE_TIMES_SECONDS: Record<IndividualMode, number> = {
   work: TWENTY_FIVE_MINUTES,
@@ -42,13 +43,14 @@ interface TimerState {
   orderIndex: number
   intervalId: number | null
   // Add: fields to track current phase for persistence
-  phaseStartAt: number | null // epoch ms
-  phasePlannedSeconds: number | null
-  phaseType: IndividualMode | null
+  sessionStartAt: DateTime | null // epoch ms
+  sessionType: IndividualMode | null
+  sessionPlannedSeconds: number | null
+  sessionId: string | null
   // Add: browser-session-only cumulative totals (do NOT persist to DB)
-  sessionTotalSec: number
-  sessionWorkSec: number
-  sessionRestSec: number
+  browserSessionTotalSec: number
+  browserSessionWorkSec: number
+  browserSessionRestSec: number
 }
 
 // Timer store actions interface
@@ -63,30 +65,37 @@ interface TimerActions {
 
 type TimerStore = TimerState & TimerActions
 
-function getPhaseTypeFromState(s: Pick<TimerState, 'mode' | 'individualMode' | 'orderIndex'>): IndividualMode {
-  // For individual mode, return the selected mode directly
+function getCurrentIndividualMode(s: Pick<TimerState, 'mode' | 'individualMode' | 'orderIndex'>): IndividualMode {
   if (s.mode === 'individually') return s.individualMode
-
-  // For infinite mode, determine phase based on position in sequence
-  // Sequence: work -> break -> work -> break -> work -> break -> work -> longBreak
-  const idx: number = s.orderIndex % ORDER_SECONDS.length
-
-  if (idx === 1 || idx === 3 || idx === 5) return 'break'
-  if (idx === 7) return 'longBreak'
-  return 'work' // Default to work phase for remaining indices (0,2,4,6)
+  return getCurrentInfinityPhase(s.orderIndex)
 }
 
-// Helper: persist a finished/partial phase
-async function persistPhase(payload: { type: IndividualMode; startedAt: number; endedAt: number; duration: number }) {
+export function getCurrentInfinityPhase(orderIndex: number): IndividualMode {
+  const idx = orderIndex % ORDER_SECONDS.length
+  if (idx === 1 || idx === 3 || idx === 5) return 'break'
+  if (idx === 7) return 'longBreak'
+  return 'work'
+}
+
+async function persistSession(payload: {
+  type: IndividualMode
+  startedAt: DateTime
+  endedAt: DateTime
+  duration: number
+  sessionId: string
+  completed: boolean
+}) {
   try {
     await db.sessions.add({
       type: payload.type,
-      startedAt: new Date(payload.startedAt),
-      endedAt: new Date(payload.endedAt),
+      startedAt: payload.startedAt.toJSDate(),
+      endedAt: payload.endedAt.toJSDate(),
       duration: payload.duration,
+      uuid: payload.sessionId,
+      completed: payload.completed,
     })
   } catch {
-    // ignore persistence errors
+    console.error("Couldn't persist Session Data")
   }
 }
 
@@ -95,18 +104,19 @@ function createTimerStore() {
     // State
     mode: 'infinite',
     individualMode: 'work',
-    remainingSeconds: ORDER_SECONDS[0] ?? 25 * 60,
+    remainingSeconds: ORDER_SECONDS[0],
     isRunning: false,
     orderIndex: 0,
     intervalId: null,
     // Add: phase trackers
-    phaseStartAt: null,
-    phasePlannedSeconds: null,
-    phaseType: null,
+    sessionStartAt: null,
+    sessionPlannedSeconds: null,
+    sessionType: null,
+    sessionId: null,
     // Add: initialize browser-session-only totals
-    sessionTotalSec: 0,
-    sessionWorkSec: 0,
-    sessionRestSec: 0,
+    browserSessionTotalSec: 0,
+    browserSessionWorkSec: 0,
+    browserSessionRestSec: 0,
 
     // Actions
     setMode: (newMode) => {
@@ -117,7 +127,7 @@ function createTimerStore() {
       if (newMode === 'infinite') {
         set({
           orderIndex: 0,
-          remainingSeconds: ORDER_SECONDS[0] ?? 25 * 60,
+          remainingSeconds: ORDER_SECONDS[0],
         })
       } else {
         set({
@@ -136,41 +146,53 @@ function createTimerStore() {
     },
 
     stop: () => {
-      const state = get()
-      const { intervalId } = state
+      const { intervalId, isRunning, sessionStartAt, sessionType, remainingSeconds, sessionId, sessionPlannedSeconds } =
+        get()
       if (intervalId !== null) clearInterval(intervalId)
 
-      // Persist current phase if it was running
-      if (state.isRunning && state.phaseStartAt && state.phaseType) {
-        const now = Date.now()
-        const planned = state.phasePlannedSeconds ?? 0
-        let duration: number
+      // Persist current phase chunk if it was running
+      if (isRunning && sessionStartAt && sessionType && sessionId) {
+        const now = DateTime.local()
 
         // If we are stopping because the timer just hit the end, remainingSeconds <= 1,
         // record the full planned duration; otherwise record elapsed wall time.
-        if (state.remainingSeconds <= 1 && planned > 0) {
-          duration = planned
-        } else {
-          duration = Math.max(0, Math.floor((now - state.phaseStartAt) / 1000))
-          // Cap to planned if available
-          if (planned > 0) duration = Math.min(duration, planned)
-        }
+        const duration =
+          remainingSeconds <= 1 && sessionPlannedSeconds
+            ? sessionPlannedSeconds
+            : now.diff(sessionStartAt).as('seconds')
 
-        void persistPhase({
-          type: state.phaseType,
-          startedAt: state.phaseStartAt,
+        const completed = remainingSeconds <= 1
+
+        void persistSession({
+          type: sessionType,
+          startedAt: sessionStartAt,
           endedAt: now,
           duration,
+          sessionId,
+          completed,
         })
+
+        // If the phase completed, clear the phase identifiers (phase ended)
+        if (completed) {
+          set({
+            isRunning: false,
+            intervalId: null,
+            // reset phase trackers
+            sessionStartAt: null,
+            sessionType: null,
+            sessionId: null,
+          })
+          return
+        }
       }
 
+      // For a normal pause (not a phase completion) we keep the phaseId/phaseType so
+      // resume will continue the same phase and produce more sessions linked to the same phaseId.
       set({
         isRunning: false,
         intervalId: null,
-        // reset phase trackers
-        phaseStartAt: null,
-        phasePlannedSeconds: null,
-        phaseType: null,
+        sessionPlannedSeconds: null,
+        sessionStartAt: null,
       })
     },
 
@@ -178,15 +200,21 @@ function createTimerStore() {
       const { isRunning, remainingSeconds } = get()
       if (isRunning || remainingSeconds <= 0) return
 
-      // Initialize phase trackers if this is a fresh start
+      // Initialize phase trackers if this is a fresh start, or resume an existing paused phase.
       const s = get()
-      if (!s.phaseStartAt || !s.phaseType) {
-        const phaseType = getPhaseTypeFromState(s)
+
+      // If there's no phaseType currently tracked, this is a brand-new phase:
+      if (!s.sessionType) {
+        const type = getCurrentIndividualMode(s)
         set({
-          phaseStartAt: Date.now(),
-          phasePlannedSeconds: s.remainingSeconds,
-          phaseType,
+          sessionStartAt: DateTime.now(),
+          sessionPlannedSeconds: s.remainingSeconds,
+          sessionType: type,
+          sessionId: v7(),
         })
+      } else if (!s.sessionStartAt) {
+        // Resuming a paused phase: keep the existing phaseId and planned seconds
+        set({ sessionStartAt: DateTime.now(), sessionPlannedSeconds: s.remainingSeconds })
       }
 
       const { intervalId: existingId } = get()
@@ -205,7 +233,7 @@ function createTimerStore() {
       if (mode === 'infinite') {
         set({
           orderIndex: 0,
-          remainingSeconds: ORDER_SECONDS[0] ?? 25 * 60,
+          remainingSeconds: ORDER_SECONDS[0],
         })
       } else {
         set({ remainingSeconds: MODE_TIMES_SECONDS[individualMode] })
@@ -218,18 +246,18 @@ function createTimerStore() {
         mode,
         individualMode,
         orderIndex,
-        sessionTotalSec,
-        sessionWorkSec,
-        sessionRestSec,
-        phaseType,
+        browserSessionTotalSec,
+        browserSessionWorkSec,
+        browserSessionRestSec,
+        sessionType,
       } = get()
 
       // Determine the current phase type (use tracked phase when available)
-      const isWork = (phaseType ?? getPhaseTypeFromState(get())) === 'work'
+      const isWork = (sessionType ?? getCurrentIndividualMode(get())) === 'work'
       set({
-        sessionTotalSec: sessionTotalSec + 1,
-        sessionWorkSec: sessionWorkSec + (isWork ? 1 : 0),
-        sessionRestSec: sessionRestSec + (isWork ? 0 : 1),
+        browserSessionTotalSec: browserSessionTotalSec + 1,
+        browserSessionWorkSec: browserSessionWorkSec + (isWork ? 1 : 0),
+        browserSessionRestSec: browserSessionRestSec + (isWork ? 0 : 1),
       })
 
       if (remainingSeconds > 1) {
@@ -273,17 +301,21 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     try {
       const raw = localStorage.getItem(PENDING_PHASE)
       if (raw) {
-        const payload = JSON.parse(raw) as {
+        const { type, startedAt, endedAt, duration, sessionId, completed } = JSON.parse(raw) as {
           type: IndividualMode
-          startedAt: number
-          endedAt: number
-          durationSec: number
+          startedAt: string
+          endedAt: string
+          duration: number
+          sessionId: string
+          completed: boolean
         }
         void db.sessions.add({
-          type: payload.type,
-          startedAt: new Date(payload.startedAt),
-          endedAt: new Date(payload.endedAt),
-          duration: payload.durationSec,
+          type,
+          startedAt: DateTime.fromISO(startedAt).toJSDate(),
+          endedAt: DateTime.fromISO(endedAt).toJSDate(),
+          duration,
+          uuid: sessionId,
+          completed,
         })
         localStorage.removeItem(PENDING_PHASE)
       }
@@ -294,26 +326,29 @@ export function TimerProvider({ children }: { children: ReactNode }) {
 
   // Persist on window close/tab hide by caching to localStorage synchronously
   useEffect(() => {
+    const abort = new AbortController()
     const handlePersistOnClose = () => {
       const s = storeRef.current?.getState()
       if (!s) return
-      if (s.isRunning && s.phaseStartAt && s.phaseType) {
-        const now = Date.now()
-        const planned = s.phasePlannedSeconds ?? 0
-        let durationSec: number
+      if (s.isRunning && s.sessionStartAt && s.sessionType) {
+        const now = DateTime.local()
 
-        if (s.remainingSeconds <= 1 && planned > 0) {
-          durationSec = planned
-        } else {
-          durationSec = Math.max(0, Math.floor((now - s.phaseStartAt) / 1000))
-          if (planned > 0) durationSec = Math.min(durationSec, planned)
-        }
+        // If we are stopping because the timer just hit the end, remainingSeconds <= 1,
+        // record the full planned duration; otherwise record elapsed wall time.
+        const duration =
+          s.remainingSeconds <= 1 && s.sessionPlannedSeconds
+            ? s.sessionPlannedSeconds
+            : now.diff(s.sessionStartAt).as('seconds')
+
+        const completed = s.remainingSeconds <= 1
 
         const payload = {
-          type: s.phaseType,
-          startedAt: s.phaseStartAt,
-          endedAt: now,
-          durationSec,
+          type: s.sessionType,
+          startedAt: s.sessionStartAt.toISO(),
+          endedAt: now.toISO(),
+          duration,
+          sessionId: s.sessionId,
+          completed,
         }
 
         try {
@@ -327,12 +362,10 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       }
     }
 
-    window.addEventListener('pagehide', handlePersistOnClose)
-    window.addEventListener('beforeunload', handlePersistOnClose)
-    return () => {
-      window.removeEventListener('pagehide', handlePersistOnClose)
-      window.removeEventListener('beforeunload', handlePersistOnClose)
-    }
+    window.addEventListener('pagehide', handlePersistOnClose, abort)
+    window.addEventListener('beforeunload', handlePersistOnClose, abort)
+
+    return () => abort.abort()
   }, [])
 
   // Cleanup on unmount (stop any running interval) unless we've already handled close
@@ -348,7 +381,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
 }
 
 export default function useTimer<T>(selector: (s: TimerStore) => T): T {
-  const store = useContext(TimerStoreContext)
+  const store = use(TimerStoreContext)
   if (!store) throw new Error('useTimerSelector must be used within a TimerProvider')
   return useStore(store, useShallow(selector))
 }
