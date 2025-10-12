@@ -12,12 +12,13 @@ export function TopNavBar() {
         <Button size="icon" onClick={() => router.history.back()}>
           <Undo2 />
         </Button>
-        <ThemeSelector />
       </div>
 
       <h1 className="flex items-center justify-center gap-4 text-2xl">Estadísticas</h1>
 
-      <div className="flex justify-end gap-4"></div>
+      <div className="flex justify-end gap-4">
+        <ThemeSelector />
+      </div>
     </nav>
   )
 }

@@ -10,7 +10,7 @@ export function BottomBar() {
   const [oldVolume, setOldVolume] = useState(0)
   const [volume, setVolume] = useMusicPlayer((store) => [store.volume, store.setVolume])
   return (
-    <div className="bg-card/80 fixed bottom-0 left-0 z-30 flex w-full items-center gap-2 border-t p-4 shadow-lg backdrop-blur sm:justify-center">
+    <div className="bg-card/80 z-30 flex w-full items-center gap-2 border-t p-4 shadow-lg backdrop-blur sm:justify-center">
       <div className="flex grow justify-center gap-2">
         <Button
           size="icon"
