@@ -13,7 +13,11 @@ export default defineConfig({
   plugins: [
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     tailwindcss(),
-    viteReact(),
+    viteReact({
+      babel: {
+        plugins: ['babel-plugin-react-compiler'],
+      },
+    }),
     tsconfigPaths(),
     VitePWA({
       registerType: 'autoUpdate',

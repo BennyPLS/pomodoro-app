@@ -10,7 +10,7 @@ export function BottomBar() {
   const [oldVolume, setOldVolume] = useState(0)
   const [volume, setVolume] = useMusicPlayer((store) => [store.volume, store.setVolume])
   return (
-    <div className="flex items-center gap-2 border-t p-4 sm:justify-center">
+    <div className="bg-card/80 fixed bottom-0 left-0 z-30 flex w-full items-center gap-2 border-t p-4 shadow-lg backdrop-blur sm:justify-center">
       <div className="flex grow justify-center gap-2">
         <Button
           size="icon"
@@ -50,7 +50,7 @@ function SessionDrawerStatistics() {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button variant="outline" size="icon">
+        <Button variant="outline" size="icon" className="border-muted-foreground/20 shadow-sm">
           <ChartBar />
         </Button>
       </DrawerTrigger>
@@ -61,24 +61,24 @@ function SessionDrawerStatistics() {
           </DrawerHeader>
           <div className="p-4">
             <div className="grid grid-cols-3 gap-4">
-              <div className="bg-card/50 flex flex-col items-center gap-2 rounded-lg border p-4 text-center">
-                <TimerIcon className="size-8" />
+              <div className="from-card/70 to-muted/40 flex flex-col items-center gap-2 rounded-xl border bg-gradient-to-br p-4 text-center shadow-sm">
+                <TimerIcon className="text-chart-3 size-8" />
                 <div className="text-muted-foreground text-sm">Total</div>
                 <div className="text-xl font-semibold">
                   {Math.floor(total / 60)} min <br />
                   {Math.floor(total % 60)} sec
                 </div>
               </div>
-              <div className="bg-card/50 flex flex-col items-center gap-2 rounded-lg border p-4 text-center">
-                <Dumbbell className="size-8" />
+              <div className="from-card/70 to-muted/40 flex flex-col items-center gap-2 rounded-xl border bg-gradient-to-br p-4 text-center shadow-sm">
+                <Dumbbell className="text-chart-1 size-8" />
                 <div className="text-muted-foreground text-sm">Trabajando</div>
                 <div className="text-xl font-semibold">
                   {Math.floor(work / 60)} min <br />
                   {Math.floor(work % 60)} sec
                 </div>
               </div>
-              <div className="bg-card/50 flex flex-col items-center gap-2 rounded-lg border p-4 text-center">
-                <EyeClosed className="size-8" />
+              <div className="from-card/70 to-muted/40 flex flex-col items-center gap-2 rounded-xl border bg-gradient-to-br p-4 text-center shadow-sm">
+                <EyeClosed className="text-chart-2 size-8" />
                 <div className="text-muted-foreground text-sm">Descansando</div>
                 <div className="text-xl font-semibold">
                   {Math.floor(rest / 60)} min <br />

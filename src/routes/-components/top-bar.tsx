@@ -18,9 +18,14 @@ export function TopBar() {
   ])
 
   return (
-    <nav className="grid grid-cols-[1fr_1fr_1fr] grid-rows-2 gap-4 border-b p-4">
+    <nav className="bg-card/80 grid grid-cols-[1fr_1fr_1fr] grid-rows-2 gap-4 border-b p-4">
       <div className="flex justify-start gap-4">
         <ThemeSelector />
+        <Button size="icon" asChild>
+          <Link to="/stats">
+            <BarChart />
+          </Link>
+        </Button>
       </div>
 
       <div className="flex justify-center gap-4">
@@ -36,11 +41,6 @@ export function TopBar() {
       </div>
 
       <div className="flex justify-end gap-4">
-        <Button size="icon" asChild>
-          <Link to="/stats">
-            <BarChart />
-          </Link>
-        </Button>
         <Button size="icon" asChild>
           <Link to="/settings">
             <Settings />

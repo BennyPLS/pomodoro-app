@@ -9,6 +9,9 @@ import { TopNavBar } from './-components/top-nav-bar'
 import { useDaily } from './-lib/use-daily'
 import { useInsights } from './-lib/use-insights'
 import { formatMinutes, formatPercentage, formatSeconds } from './-lib/utils'
+import { FocusMilestones } from './-components/focus-milestones'
+import { PomodoroMilestones } from './-components/pomodoro-milestones'
+import { useAchievements } from './-lib/use-achievements'
 import db from '@/lib/db'
 
 export const Route = createFileRoute('/stats/')({
@@ -22,13 +25,28 @@ function Page() {
   const insights = useInsights(daily)
   const last14 = useMemo(() => daily.slice(-14), [daily])
 
+  const achievements = useAchievements(sessions, insights.streak)
+
+  const next = achievements.nextStreak
+  const streakProgressPct = next?.progressPct
+
+  const streakProgressLabel = next
+    ? `${achievements.totals.streakDays} / ${next.thresholdDays} días | Siguiente: ${next.title}`
+    : '¡Has desbloqueado todos los hitos de racha!'
+
   return (
-    <div className="mx-auto w-full max-w-6xl p-4 sm:p-6">
+    <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 p-4 sm:p-6">
       <TopNavBar />
 
       {/* Insights */}
-      <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <InsightCard title="Racha de días con trabajo" value={insights.streak.toString()} hint="Consecutivos" />
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <InsightCard
+          title={`Racha de días con trabajo`}
+          value={insights.streak.toString()}
+          hint={next?.title}
+          progressPct={streakProgressPct}
+          progressLabel={streakProgressPct !== undefined ? streakProgressLabel : undefined}
+        />
         <InsightCard
           title="Tendencia semanal"
           value={`${insights.weekWorkChange >= 0 ? '+' : '-'}${formatSeconds(Math.abs(insights.weekWorkChange))}`}
@@ -45,7 +63,7 @@ function Page() {
       </section>
 
       {/* This week summary */}
-      <section className="bg-card/50 mb-8 flex flex-wrap items-center gap-4 rounded-lg border p-4">
+      <section className="bg-card/50 flex flex-wrap items-center gap-4 rounded-lg border p-4 shadow-sm">
         <h2 className="mr-2 text-lg font-medium">Esta semana</h2>
         <BadgeStat label="Trabajo" value={formatSeconds(insights.weekWork)} className="bg-chart-1/15 text-chart-1" />
         <BadgeStat label="Descanso" value={formatSeconds(insights.weekRest)} className="bg-chart-2/15 text-chart-2" />
@@ -60,7 +78,7 @@ function Page() {
       </section>
 
       {/* Charts */}
-      <section className="bg-card/50 mb-8 rounded-lg border p-4">
+      <section className="bg-card/50 rounded-lg border p-4 shadow-sm">
         <h2 className="mb-4 text-lg font-medium">Últimos 14 días</h2>
         <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
@@ -96,6 +114,29 @@ function Page() {
             </ComposedChart>
           </ResponsiveContainer>
         </div>
+      </section>
+
+      {/* Focus Time Milestones */}
+      <section className="bg-card/50 rounded-lg border p-4 shadow-sm">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-medium">Hitos de tiempo de enfoque</h2>
+          <div className="text-muted-foreground text-sm">
+            Total enfocado: {formatSeconds(achievements.totals.totalWorkSec)}
+          </div>
+        </div>
+        <FocusMilestones milestones={achievements.focus} totalWorkSec={achievements.totals.totalWorkSec} />
+      </section>
+
+      {/* Pomodoro Count Milestones */}
+      <section className="bg-card/50 rounded-lg border p-4 shadow-sm">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-lg font-medium">Hitos de cantidad de Pomodoros</h2>
+          <div className="text-muted-foreground text-sm">Completados: {achievements.totals.completedPomodoros}</div>
+        </div>
+        <PomodoroMilestones
+          milestones={achievements.pomodoro}
+          completedPomodoros={achievements.totals.completedPomodoros}
+        />
       </section>
     </div>
   )
