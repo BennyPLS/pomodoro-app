@@ -28,13 +28,13 @@ export function useInsights(daily: Array<DailyStat>) {
   return useMemo<Insights>(() => {
     if (daily.length === 0) return EMPTY_INSIGHTS
 
-    const today = DateTime.local().startOf('day')
+    const today = DateTime.local().endOf('day')
     const weekStart = today.startOf('week')
     const weekEnd = today.endOf('week')
     const prevWeekStart = weekStart.minus({ weeks: 1 })
     const prevWeekEnd = weekEnd.minus({ weeks: 1 })
 
-    const workByDay = new Set<DateTime<true>>()
+    const workByDay = new Set<string>()
 
     let weekWork = 0
     let weekRest = 0
@@ -43,7 +43,7 @@ export function useInsights(daily: Array<DailyStat>) {
     let bestDayCompleted = 0
 
     for (const d of daily) {
-      if (d.completed > 0) workByDay.add(d.date)
+      if (d.completed > 0) workByDay.add(d.date.toISODate())
 
       if (weekStart <= d.date && d.date <= weekEnd) {
         if (d.completed > bestDayCompleted) {
@@ -58,9 +58,9 @@ export function useInsights(daily: Array<DailyStat>) {
     }
 
     let streak = 0
-    let cursor = today
+    let cursor = today.minus({ days: 1 })
     while (streak < MAX_STREAK_LENGTH) {
-      if (!workByDay.has(cursor)) break
+      if (!workByDay.has(cursor.toISODate())) break
       streak += 1
       cursor = cursor.minus({ days: 1 })
     }
