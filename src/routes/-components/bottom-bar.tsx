@@ -1,16 +1,38 @@
-import { ChartBar, Dumbbell, EyeClosed, Timer as TimerIcon, Volume, Volume1, Volume2, VolumeX } from 'lucide-react'
-import { useState } from 'react'
+import {
+  ChartBar,
+  Check,
+  ClipboardClock,
+  ClipboardList,
+  Dumbbell,
+  EyeClosed,
+  Plus,
+  Timer as TimerIcon,
+  Volume,
+  Volume1,
+  Volume2,
+  VolumeX,
+} from 'lucide-react'
+import { useRef, useState } from 'react'
+import { useLiveQuery } from 'dexie-react-hooks'
+import type { KeyboardEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer'
 import { Slider } from '@/components/ui/slider'
 import { useMusicPlayer } from '@/providers/music-provider'
 import useTimer from '@/providers/timer-provider'
+import db from '@/lib/db'
+import { InputGroup, InputGroupAddon, InputGroupButton, InputGroupInput } from '@/components/ui/input-group'
+import { Item, ItemActions, ItemContent, ItemMedia, ItemTitle } from '@/components/ui/item'
+import { Field, FieldLabel } from '@/components/ui/field'
 
 export function BottomBar() {
   const [oldVolume, setOldVolume] = useState(0)
   const [volume, setVolume] = useMusicPlayer((store) => [store.volume, store.setVolume])
   return (
     <div className="bg-card/80 z-30 flex w-full items-center gap-2 border-t p-4 shadow-lg backdrop-blur sm:justify-center">
+      {/* Session Statistics */}
+      <SessionDrawerStatistics />
+      {/* Volume Control */}
       <div className="flex grow justify-center gap-2">
         <Button
           size="icon"
@@ -34,8 +56,7 @@ export function BottomBar() {
           className="sm:w-80"
         />
       </div>
-      {/* Session Statistics */}
-      <SessionDrawerStatistics />
+      <TaskDrawer />
     </div>
   )
 }
@@ -86,6 +107,79 @@ function SessionDrawerStatistics() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </DrawerContent>
+    </Drawer>
+  )
+}
+
+function TaskDrawer() {
+  const taskNameInputRef = useRef<HTMLInputElement>(null)
+  const tasks = useLiveQuery(() => db.tasks.toArray())
+
+  const addTask = async () => {
+    if (!taskNameInputRef.current) return
+    const name = taskNameInputRef.current.value
+    if (!name || name.trim().length < 1) return
+    await db.tasks.add({ name })
+    taskNameInputRef.current.value = ''
+  }
+
+  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') void addTask()
+  }
+
+  const markAsCompleted = async (id: number) => {
+    await db.tasks.delete(id)
+  }
+
+  return (
+    <Drawer>
+      <DrawerTrigger asChild>
+        <Button variant="outline" size="icon" className="border-muted-foreground/20 shadow-sm">
+          <ClipboardList />
+        </Button>
+      </DrawerTrigger>
+      <DrawerContent className="">
+        <div className="mx-auto flex w-full max-w-sm flex-col gap-2 overflow-hidden">
+          <DrawerHeader>
+            <DrawerTitle>Tareas</DrawerTitle>
+          </DrawerHeader>
+          <Field>
+            <FieldLabel htmlFor="task-name">Añadir tarea</FieldLabel>
+            <InputGroup>
+              <InputGroupInput
+                id="task-name"
+                placeholder="Estudiar Matematicas"
+                ref={taskNameInputRef}
+                onKeyDown={onKeyDown}
+              />
+              <InputGroupAddon align="inline-end">
+                <InputGroupButton size="icon-xs" onClick={addTask}>
+                  <Plus />
+                </InputGroupButton>
+              </InputGroupAddon>
+            </InputGroup>
+          </Field>
+          <div className="flex flex-grow flex-col gap-2 overflow-y-scroll p-4">
+            {tasks?.map((task) => {
+              return (
+                <Item key={task.id} variant="outline" size="sm">
+                  <ItemMedia>
+                    <ClipboardClock className="size-5" />
+                  </ItemMedia>
+                  <ItemContent>
+                    <ItemTitle>{task.name}</ItemTitle>
+                  </ItemContent>
+                  <ItemActions>
+                    <Button variant="outline" size="icon" onClick={() => markAsCompleted(task.id!)}>
+                      <Check className="size-4" />
+                    </Button>
+                  </ItemActions>
+                </Item>
+              )
+            })}
           </div>
         </div>
       </DrawerContent>

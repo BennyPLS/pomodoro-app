@@ -19,14 +19,21 @@ export interface Session {
   completed: boolean
 }
 
+export interface Tasks {
+  id?: number
+  name: string
+}
+
 export const db = new Dexie('db') as Dexie & {
   music: EntityTable<Music, 'title'>
   sessions: EntityTable<Session, 'id'>
+  tasks: EntityTable<Tasks, 'id'>
 }
 
 db.version(1).stores({
   music: 'title, order',
   sessions: '++id, startedAt, type',
+  tasks: '++id',
 })
 
 export default db
