@@ -19,21 +19,25 @@ export interface Session {
   completed: boolean
 }
 
-export interface Tasks {
-  id?: number
+export type TaskStatus = 'todo' | 'in_progress' | 'done'
+
+export interface Task {
+  uuid: string
   name: string
+  status: TaskStatus
+  parent?: string
 }
 
 export const db = new Dexie('db') as Dexie & {
   music: EntityTable<Music, 'title'>
   sessions: EntityTable<Session, 'id'>
-  tasks: EntityTable<Tasks, 'id'>
+  tasks: EntityTable<Task, 'uuid'>
 }
 
 db.version(1).stores({
   music: 'title, order',
   sessions: '++id, startedAt, type',
-  tasks: '++id',
+  tasks: 'uuid',
 })
 
 export default db

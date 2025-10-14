@@ -43,7 +43,7 @@ function Page() {
         <InsightCard
           title={`Racha de días con trabajo`}
           value={insights.streak.toString()}
-          hint={next?.title}
+          hint={insights.streakAtRisk ? '⚠️ Si no trabajas hoy, perderás tu racha' : next?.title}
           progressPct={streakProgressPct}
           progressLabel={streakProgressPct !== undefined ? streakProgressLabel : undefined}
         />

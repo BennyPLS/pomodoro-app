@@ -11,6 +11,8 @@ const buttonVariants = cva(
       variant: {
         default: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow',
         destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm',
+        'outline-destructive':
+          'border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground border shadow-sm',
         outline: 'border-input bg-background hover:bg-accent hover:text-accent-foreground border shadow-sm',
         secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm',
         ghost: 'hover:bg-accent hover:text-accent-foreground',
@@ -34,9 +36,9 @@ export interface ButtonProps extends ComponentProps<'button'>, VariantProps<type
   asChild?: boolean
 }
 
-const Button = ({ ref, className, variant, size, asChild = false, ...props }: ButtonProps) => {
+const Button = ({ ref, className, variant, size, asChild = false, type = 'button', ...props }: ButtonProps) => {
   const Comp = asChild ? Slot : 'button'
-  return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
+  return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} type={type} {...props} />
 }
 Button.displayName = 'Button'
 
