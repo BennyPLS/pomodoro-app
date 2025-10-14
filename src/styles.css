@@ -5,6 +5,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  --radius: 0.625rem;
+
   /* Nord Light Theme */
   --background: oklch(0.99 0.005 258.324);
   --foreground: oklch(0.455 0.034 263.203);

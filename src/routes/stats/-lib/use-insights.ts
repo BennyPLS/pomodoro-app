@@ -18,6 +18,7 @@ export type Insights = {
   prevWeekWork: number
   bestDay: DateTime | null
   bestDayCompleted: number
+  streakAtRisk: boolean
 }
 
 /**
@@ -28,13 +29,13 @@ export function useInsights(daily: Array<DailyStat>) {
   return useMemo<Insights>(() => {
     if (daily.length === 0) return EMPTY_INSIGHTS
 
-    const today = DateTime.local().startOf('day')
+    const today = DateTime.local().endOf('day')
     const weekStart = today.startOf('week')
     const weekEnd = today.endOf('week')
     const prevWeekStart = weekStart.minus({ weeks: 1 })
     const prevWeekEnd = weekEnd.minus({ weeks: 1 })
 
-    const workByDay = new Set<DateTime<true>>()
+    const workByDay = new Set<string>()
 
     let weekWork = 0
     let weekRest = 0
@@ -43,7 +44,7 @@ export function useInsights(daily: Array<DailyStat>) {
     let bestDayCompleted = 0
 
     for (const d of daily) {
-      if (d.completed > 0) workByDay.add(d.date)
+      if (d.completed > 0) workByDay.add(d.date.toISODate())
 
       if (weekStart <= d.date && d.date <= weekEnd) {
         if (d.completed > bestDayCompleted) {
@@ -57,13 +58,19 @@ export function useInsights(daily: Array<DailyStat>) {
       }
     }
 
+    // Include today in streak if you worked today (Duolingo-like behavior)
+    const workedToday = workByDay.has(today.toISODate())
+
     let streak = 0
-    let cursor = today
+    let cursor = workedToday ? today : today.minus({ days: 1 })
     while (streak < MAX_STREAK_LENGTH) {
-      if (!workByDay.has(cursor)) break
+      if (!workByDay.has(cursor.toISODate())) break
       streak += 1
       cursor = cursor.minus({ days: 1 })
     }
+
+    // Warn if you haven't done today but you have a non-zero streak (you'll lose it)
+    const streakAtRisk = !workedToday && streak > 0
 
     const weekTotal = weekWork + weekRest
     const weekWorkPct = weekTotal > 0 ? (weekWork / weekTotal) * 100 : 0
@@ -82,6 +89,7 @@ export function useInsights(daily: Array<DailyStat>) {
       prevWeekWork,
       bestDay,
       bestDayCompleted,
+      streakAtRisk,
     }
   }, [daily])
 }
@@ -98,4 +106,5 @@ const EMPTY_INSIGHTS: Insights = Object.freeze({
   prevWeekWork: 0,
   bestDay: null,
   bestDayCompleted: 0,
+  streakAtRisk: false,
 })
