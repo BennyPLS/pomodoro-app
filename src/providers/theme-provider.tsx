@@ -30,8 +30,9 @@ export function ThemeProvider({
   storageKey = 'theme',
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useLocalStorage(storageKey, defaultTheme)
+  const [theme, setTheme] = useLocalStorage<Theme>(storageKey, defaultTheme)
 
+  // TODO: In the `ThemeProvider`, the logic for handling theme classes (dark/light) with `classList` is repeated and could be abstracted into a helper function. This would improve readability and reduce the risk of inconsistencies when updating the logic.
   const handleMediaQuery = useCallback(
     (e: MediaQueryListEvent | MediaQueryList) => {
       if (theme !== 'system') return

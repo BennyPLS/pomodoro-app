@@ -9,58 +9,89 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TasksRouteRouteImport } from './routes/tasks/route'
+import { Route as StatsRouteRouteImport } from './routes/stats/route'
+import { Route as SettingsRouteRouteImport } from './routes/settings/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as StatsIndexRouteImport } from './routes/stats/index'
-import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 
+const TasksRouteRoute = TasksRouteRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StatsRouteRoute = StatsRouteRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRouteRoute = SettingsRouteRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StatsIndexRoute = StatsIndexRouteImport.update({
-  id: '/stats/',
-  path: '/stats/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsIndexRoute = SettingsIndexRouteImport.update({
-  id: '/settings/',
-  path: '/settings/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/settings': typeof SettingsIndexRoute
-  '/stats': typeof StatsIndexRoute
+  '/settings': typeof SettingsRouteRoute
+  '/stats': typeof StatsRouteRoute
+  '/tasks': typeof TasksRouteRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/settings': typeof SettingsIndexRoute
-  '/stats': typeof StatsIndexRoute
+  '/settings': typeof SettingsRouteRoute
+  '/stats': typeof StatsRouteRoute
+  '/tasks': typeof TasksRouteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/settings/': typeof SettingsIndexRoute
-  '/stats/': typeof StatsIndexRoute
+  '/settings': typeof SettingsRouteRoute
+  '/stats': typeof StatsRouteRoute
+  '/tasks': typeof TasksRouteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/settings' | '/stats'
+  fullPaths: '/' | '/settings' | '/stats' | '/tasks'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/settings' | '/stats'
-  id: '__root__' | '/' | '/settings/' | '/stats/'
+  to: '/' | '/settings' | '/stats' | '/tasks'
+  id: '__root__' | '/' | '/settings' | '/stats' | '/tasks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  SettingsIndexRoute: typeof SettingsIndexRoute
-  StatsIndexRoute: typeof StatsIndexRoute
+  SettingsRouteRoute: typeof SettingsRouteRoute
+  StatsRouteRoute: typeof StatsRouteRoute
+  TasksRouteRoute: typeof TasksRouteRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tasks': {
+      id: '/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof TasksRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stats': {
+      id: '/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof StatsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -68,27 +99,14 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/stats/': {
-      id: '/stats/'
-      path: '/stats'
-      fullPath: '/stats'
-      preLoaderRoute: typeof StatsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings/': {
-      id: '/settings/'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  SettingsIndexRoute: SettingsIndexRoute,
-  StatsIndexRoute: StatsIndexRoute,
+  SettingsRouteRoute: SettingsRouteRoute,
+  StatsRouteRoute: StatsRouteRoute,
+  TasksRouteRoute: TasksRouteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
