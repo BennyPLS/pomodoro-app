@@ -5,6 +5,7 @@ import { env } from '@/env'
 import { MusicPlayerProvider } from '@/providers/music-provider'
 import { ThemeProvider } from '@/providers/theme-provider'
 import { TimerProvider } from '@/providers/timer-provider'
+import FirstTimeVisitScript from '@/scripts/first-time-visit'
 
 export const Route = createRootRoute({
   component: () => (
@@ -20,6 +21,7 @@ export const Route = createRootRoute({
         </TimerProvider>
       </MusicPlayerProvider>
       {env.VITE_ENV === 'development' && <Devtools />}
+      <FirstTimeVisitScript />
     </>
   ),
 })

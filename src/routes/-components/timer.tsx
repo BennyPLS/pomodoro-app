@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import type { RefObject } from 'react'
 import type { IndividualMode } from '@/providers/timer-provider'
 import { Button } from '@/components/ui/button'
-import { useLocalStorage } from '@/hooks/use-local-storage'
+import { useLocalStorageJson } from '@/hooks/use-local-storage'
 import { useMusicPlayer } from '@/providers/music-provider'
 import useTimer, { getCurrentInfinityPhase } from '@/providers/timer-provider'
 
@@ -52,7 +52,7 @@ function phaseToText(phase: IndividualMode) {
 
 // --- Timer Component ---
 export function Timer() {
-  const [pomodoroSmartMusic] = useLocalStorage('pomodoro-smart-music', true)
+  const [pomodoroSmartMusic] = useLocalStorageJson('pomodoro-smart-music', true)
 
   // --- Refs ---
   const finishAudio = useRef<HTMLAudioElement | null>(null)

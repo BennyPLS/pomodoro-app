@@ -1,27 +1,26 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useMemo } from 'react'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
 import { Switch } from '@/components/ui/switch'
-import { useLocalStorage } from '@/hooks/use-local-storage'
+import { useLocalStorageJson } from '@/hooks/use-local-storage'
 import db from '@/lib/db'
 import { AddMusicDialog } from '@/routes/settings/-components/add-music-dialog'
 import { MusicItem } from '@/routes/settings/-components/music-item'
-import { TopNavBar } from '@/routes/settings/-components/top-nav-bar'
+import { TopBar } from '@/routes/settings/-components/top-bar'
 
-export const Route = createFileRoute('/settings/')({
+export const Route = createFileRoute('/settings')({
   component: Page,
 })
 function Page() {
-  const [automaticReproduction, setAutomaticReproduction] = useLocalStorage('pomodoro-smart-music', true)
+  const [automaticReproduction, setAutomaticReproduction] = useLocalStorageJson('pomodoro-smart-music', true)
   const music = useLiveQuery(() => db.music.toArray().then((items) => items.sort((a, b) => a.order - b.order)))
 
-  const isLoading = useMemo(() => music === undefined, [music])
+  const isLoading = music === undefined
 
   return (
-    <div className="flex h-svh flex-col gap-4">
-      <TopNavBar />
+    <div className="flex h-svh flex-col gap-4 [view-transition-name:main-content]">
+      <TopBar />
       <main className="flex flex-col items-center justify-center gap-4">
         <div className="flex gap-4">
           <Label>Música inteligente Pomodoro</Label>
@@ -38,7 +37,7 @@ function Page() {
                 <Spinner />
               </div>
             ) : (
-              music?.map((item, index) => (
+              music.map((item, index) => (
                 <MusicItem
                   music={item}
                   key={item.title}

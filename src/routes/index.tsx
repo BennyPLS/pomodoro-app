@@ -10,7 +10,7 @@ export const Route = createFileRoute('/')({
 
 function App() {
   return (
-    <div className="flex h-svh w-screen flex-col">
+    <div className="flex h-svh w-screen flex-col [view-transition-name:main-content]">
       <FirstTimeVisitScript />
       <TopBar />
       <main className="flex grow items-center justify-center gap-4 py-4">
