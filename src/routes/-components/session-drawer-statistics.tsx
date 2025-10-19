@@ -28,7 +28,8 @@ export function SessionDrawerStatistics() {
                 <TimerIcon className="text-chart-3 size-8" />
                 <div className="text-muted-foreground text-sm">Total</div>
                 <div className="text-xl font-semibold">
-                  {Math.floor(total / 60)} min <br />
+                  {Math.floor(total / 3600) > 0 && `${Math.floor(total / 3600)} hr `}
+                  {Math.floor((total % 3600) / 60)} min <br />
                   {Math.floor(total % 60)} sec
                 </div>
               </div>
@@ -36,7 +37,8 @@ export function SessionDrawerStatistics() {
                 <Dumbbell className="text-chart-1 size-8" />
                 <div className="text-muted-foreground text-sm">Trabajando</div>
                 <div className="text-xl font-semibold">
-                  {Math.floor(work / 60)} min <br />
+                  {Math.floor(work / 3600) > 0 && `${Math.floor(work / 3600)} hr `}
+                  {Math.floor((work % 3600) / 60)} min <br />
                   {Math.floor(work % 60)} sec
                 </div>
               </div>
@@ -44,7 +46,8 @@ export function SessionDrawerStatistics() {
                 <EyeClosed className="text-chart-2 size-8" />
                 <div className="text-muted-foreground text-sm">Descansando</div>
                 <div className="text-xl font-semibold">
-                  {Math.floor(rest / 60)} min <br />
+                  {Math.floor(rest / 3600) > 0 && `${Math.floor(rest / 3600)} hr `}
+                  {Math.floor((rest % 3600) / 60)} min <br />
                   {Math.floor(rest % 60)} sec
                 </div>
               </div>

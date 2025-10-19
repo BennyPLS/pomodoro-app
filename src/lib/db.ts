@@ -19,7 +19,7 @@ export interface Session {
   completed: boolean
 }
 
-export type TaskStatus = 'todo' | 'in_progress' | 'done'
+export type TaskStatus = 'todo' | 'doing' | 'done'
 
 export interface Task {
   uuid: string

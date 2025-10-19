@@ -36,7 +36,7 @@ export function TaskItemCreation({
       <Form form={form} className="flex-row">
         <ItemMedia>
           <div className="border-input inline-flex size-9 items-center justify-center rounded-md border">
-            <Clipboard className="size-4" />
+            <Clipboard className="text-chart-3 size-4" />
           </div>
         </ItemMedia>
         <ItemContent>

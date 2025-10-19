@@ -34,9 +34,17 @@ function RouteComponent() {
           <ClipboardList />
         </Link>
       </Button>
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-4 p-4">
-        <h1 className="flex items-center justify-center gap-4 text-2xl">Tareas</h1>
-        <div className="flex flex-grow flex-col gap-2 overflow-y-scroll">
+      <div className="relative mx-auto flex w-full max-w-xl flex-col gap-4 py-4">
+        <div
+          aria-hidden
+          className="to-background pointer-events-none absolute top-0 bottom-0 left-0 z-10 w-4 bg-gradient-to-l from-transparent"
+        />
+        <div
+          aria-hidden
+          className="to-background pointer-events-none absolute top-0 right-0 bottom-0 z-10 w-4 bg-gradient-to-r from-transparent"
+        />
+        <h1 className="flex items-center justify-center gap-4 px-4 text-2xl">Tareas</h1>
+        <div className="flex flex-grow flex-col gap-2 overflow-x-hidden overflow-y-scroll px-4">
           {groupedTasks?.map((task) => (
             <TaskItem key={task.uuid} task={task} remove={remove} />
           ))}
