@@ -1,8 +1,9 @@
-import { ArrowDown, ArrowUp, Pause, Play, Trash2, Volume, Volume1, Volume2, VolumeX } from 'lucide-react'
+import { ArrowDown, ArrowUp, Pause, Play } from 'lucide-react'
 import { useMemo } from 'react'
+import { motion, useAnimate } from 'motion/react'
 import type { Music } from '@/lib/db'
+import type { PanInfo } from 'motion'
 import { Button } from '@/components/ui/button'
-import { Slider } from '@/components/ui/slider'
 import { useAudioPlayer } from '@/hooks/use-audio-player'
 import db from '@/lib/db'
 
@@ -14,12 +15,8 @@ interface MusicItemProps {
 }
 
 export function MusicItem({ music: { blob, title, order }, isFirst, isLast, allMusic }: MusicItemProps) {
-  const { controls, duration, isMuted, volume, isPlaying, currentTime } = useAudioPlayer(blob)
-
-  const VolumeStatus = useMemo(
-    () => (isMuted ? VolumeX : volume < 0.3 ? Volume : volume < 0.6 ? Volume1 : Volume2),
-    [volume, isMuted],
-  )
+  const { controls, isPlaying } = useAudioPlayer(blob)
+  const [scope, animate] = useAnimate()
 
   const PlayPauseIcon = useMemo(() => (isPlaying ? Pause : Play), [isPlaying])
 
@@ -48,10 +45,47 @@ export function MusicItem({ music: { blob, title, order }, isFirst, isLast, allM
     await db.music.update(itemBelow.title, { order: order })
   }
 
+  const removeItem = async () => {
+    await db.music.delete(title)
+
+    // Update the order of items after this one
+    const itemsAfter = allMusic.filter((m) => m.order > order)
+    for (const item of itemsAfter) {
+      await db.music.update(item.title, {
+        order: item.order - 1,
+      })
+    }
+  }
+
+  const handleDragEnd = (_event: never, info: PanInfo) => {
+    const offset = info.offset.x
+    const velocity = info.velocity.x
+
+    if (offset > 100 || velocity > 500) {
+      // swipe right to delete
+      animate(scope.current, { x: '100%' }, { duration: 0.2 })
+      setTimeout(async () => await removeItem(), 200)
+    } else {
+      animate(scope.current, { x: 0, opacity: 1 }, { duration: 0.5 })
+    }
+  }
+
   return (
-    <div className="bg-card flex flex-col gap-4 rounded border p-4">
-      <div className="flex items-center gap-4">
-        <h2 className="text-xl font-bold">{title}</h2>
+    <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }}>
+      <motion.div
+        className="bg-card flex items-center gap-3 rounded border p-3"
+        drag="x"
+        ref={scope}
+        dragConstraints={{ top: 0, bottom: 0, left: 0 }}
+        whileDrag={{ cursor: 'grabbing' }}
+        onDragEnd={handleDragEnd}
+      >
+        <Button size="icon" variant="outline" onClick={() => controls.toggle()}>
+          <PlayPauseIcon />
+        </Button>
+
+        <h2 className="truncate text-base font-semibold">{title}</h2>
+
         <div className="ml-auto flex gap-2">
           <Button size="icon" variant="outline" onClick={moveUp} disabled={isFirst}>
             <ArrowUp className="h-4 w-4" />
@@ -59,50 +93,8 @@ export function MusicItem({ music: { blob, title, order }, isFirst, isLast, allM
           <Button size="icon" variant="outline" onClick={moveDown} disabled={isLast}>
             <ArrowDown className="h-4 w-4" />
           </Button>
-          <Button
-            size="icon"
-            variant="destructive"
-            onClick={async () => {
-              // Delete the item
-              await db.music.delete(title)
-
-              // Update the order of items after this one
-              const itemsAfter = allMusic.filter((m) => m.order > order)
-              for (const item of itemsAfter) {
-                await db.music.update(item.title, {
-                  order: item.order - 1,
-                })
-              }
-            }}
-          >
-            <Trash2 />
-          </Button>
         </div>
-      </div>
-      <div className="flex items-center gap-4">
-        <Button size="icon" variant="outline" onClick={() => controls.toggle()}>
-          <PlayPauseIcon />
-        </Button>
-        <Slider
-          className="w-56 shrink-0"
-          value={[currentTime]}
-          max={duration}
-          onValueChange={(value) => controls.seek(value[0])}
-        />
-      </div>
-      <div className="flex items-center gap-4">
-        <Button size="icon" variant="outline" onClick={() => controls.toggleMute()}>
-          <VolumeStatus />
-        </Button>
-        <Slider
-          className="w-56 shrink-0"
-          value={[volume]}
-          min={0}
-          max={1}
-          step={0.01}
-          onValueChange={(value) => controls.setVolume(value[0])}
-        />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

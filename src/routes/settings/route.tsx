@@ -21,17 +21,25 @@ function Page() {
   return (
     <div className="flex h-svh flex-col gap-4 [view-transition-name:main-content]">
       <TopBar />
-      <main className="flex flex-col items-center justify-center gap-4">
-        <div className="flex gap-4">
+      <main className="relative mx-auto flex w-full max-w-xl flex-col gap-4 py-4">
+        <div className="flex gap-4 px-4">
           <Label>Música inteligente Pomodoro</Label>
           <Switch checked={automaticReproduction} onCheckedChange={setAutomaticReproduction} />
         </div>
         <div className="flex flex-col gap-4 overflow-y-scroll">
-          <div className="flex items-center justify-between gap-4 p-2">
+          <div className="flex items-center justify-between gap-4 p-4">
             <h1 className="text-center text-xl font-bold">Tu Musica</h1>
             <AddMusicDialog isLoading={isLoading} />
           </div>
-          <div className="flex flex-col gap-4 overflow-y-scroll p-2 lg:max-h-194">
+          <div className="relative flex flex-col gap-4 overflow-x-hidden overflow-y-scroll p-4 lg:max-h-194">
+            <div
+              aria-hidden
+              className="to-background pointer-events-none absolute top-0 bottom-0 left-0 z-10 w-4 bg-gradient-to-l from-transparent"
+            />
+            <div
+              aria-hidden
+              className="to-background pointer-events-none absolute top-0 right-0 bottom-0 z-10 w-4 bg-gradient-to-r from-transparent"
+            />
             {isLoading ? (
               <div className="flex justify-center">
                 <Spinner />
