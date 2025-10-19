@@ -33,7 +33,6 @@ export function MusicItem({ music: { blob, title, order }, isFirst, isLast, allM
   }
 
   const moveDown = async () => {
-    console.log('click')
     if (isLast) return
 
     // Find the item below this one
