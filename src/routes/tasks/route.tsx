@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import db from '@/lib/db'
 import { TaskItemCreation } from '@/routes/tasks/-task-item-creation'
 import TaskItem from '@/routes/tasks/-task-item'
+import { m } from '@/lib/i18n'
 
 export const Route = createFileRoute('/tasks')({
   component: RouteComponent,
@@ -30,7 +31,7 @@ function RouteComponent() {
   return (
     <div className="bg-background flex h-svh w-screen flex-col [view-transition-name:main-content]">
       <Button variant="outline" className="w-full rounded-none border-0 border-b" asChild>
-        <Link to="/" viewTransition={{ types: ['slide-drawer-down'] }}>
+        <Link aria-label={m.back()} to="/" viewTransition={{ types: ['slide-drawer-down'] }}>
           <ClipboardList />
         </Link>
       </Button>
@@ -43,7 +44,7 @@ function RouteComponent() {
           aria-hidden
           className="to-background pointer-events-none absolute top-0 right-0 bottom-0 z-10 w-4 bg-gradient-to-r from-transparent"
         />
-        <h1 className="flex items-center justify-center gap-4 px-4 text-2xl">Tareas</h1>
+        <h1 className="flex items-center justify-center gap-4 px-4 text-2xl">{m.tasks()}</h1>
         <div className="flex flex-grow flex-col gap-2 overflow-x-hidden overflow-y-scroll px-4">
           {groupedTasks?.map((task) => (
             <TaskItem key={task.uuid} task={task} remove={remove} />
@@ -51,7 +52,7 @@ function RouteComponent() {
           {isAdding ? (
             <TaskItemCreation onCreation={() => setIsAdding(false)} onCancel={() => setIsAdding(false)} />
           ) : (
-            <Button className="w-full" onClick={() => setIsAdding(true)}>
+            <Button aria-label={m.add_task()} className="w-full" onClick={() => setIsAdding(true)}>
               <Plus />
             </Button>
           )}

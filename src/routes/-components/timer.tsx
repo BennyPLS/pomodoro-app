@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useLocalStorageJson } from '@/hooks/use-local-storage'
 import { useMusicPlayer } from '@/providers/music-provider'
 import useTimer, { getCurrentInfinityPhase } from '@/providers/timer-provider'
+import { getLocale, m } from '@/lib/i18n'
 
 // --- Constants ---
 const DIGIT_HEIGHT_PX = 128 // Matches h-30 (120 px) + gap-2 (8 px) in CSS
@@ -42,11 +43,11 @@ const getDigitsFromSeconds = (
 function phaseToText(phase: IndividualMode) {
   switch (phase) {
     case 'break':
-      return 'Descanso'
+      return m.break()
     case 'work':
-      return 'Trabajo'
+      return m.work()
     case 'longBreak':
-      return 'Descanso Largo'
+      return m.long_break()
   }
 }
 
@@ -111,9 +112,10 @@ export function Timer() {
   // --- Accessibility Text ---
   const minutes = Math.floor(remainingSeconds / 60)
   const seconds = remainingSeconds % 60
-  const formattedAccessibleTime = `Tiempo restante: ${minutes} minuto${minutes !== 1 ? 's' : ''} ${seconds
-    .toString()
-    .padStart(2, '0')} segundos`
+  const formattedAccessibleTime = m.time_remaining({
+    minutes: new Intl.NumberFormat(getLocale(), { style: 'unit', unit: 'minute', unitDisplay: 'long' }).format(minutes),
+    seconds: new Intl.NumberFormat(getLocale(), { style: 'unit', unit: 'second', unitDisplay: 'long' }).format(seconds),
+  })
 
   // --- Render ---
   return (
@@ -121,10 +123,10 @@ export function Timer() {
       {/* Mode Buttons */}
       <div className="flex gap-4">
         <Button onClick={() => setMode('infinite')} variant={mode === 'infinite' ? 'default' : 'outline'}>
-          Infinito
+          {m.infinity()}
         </Button>
         <Button onClick={() => setMode('individually')} variant={mode === 'individually' ? 'default' : 'outline'}>
-          Individual
+          {m.individually()}
         </Button>
       </div>
 
@@ -137,23 +139,23 @@ export function Timer() {
               onClick={() => setIndividualMode('work')}
               variant={individualMode === 'work' ? 'secondary' : 'ghost'}
             >
-              Trabajo
+              {m.work()}
             </Button>
             <Button
               onClick={() => setIndividualMode('break')}
               variant={individualMode === 'break' ? 'secondary' : 'ghost'}
             >
-              Descanso
+              {m.break()}
             </Button>
             <Button
               onClick={() => setIndividualMode('longBreak')}
               variant={individualMode === 'longBreak' ? 'secondary' : 'ghost'}
             >
-              Descanso Largo
+              {m.long_break()}
             </Button>
           </div>
         ) : (
-          <div>Fase: {phaseToText(getCurrentInfinityPhase(orderIndex))}</div>
+          <div>{phaseToText(getCurrentInfinityPhase(orderIndex))}</div>
         )}
       </div>
 
@@ -230,13 +232,13 @@ export function Timer() {
       {/* Control Buttons */}
       <div className="mt-2 flex gap-4">
         <Button onClick={start} disabled={isRunning || remainingSeconds === 0}>
-          Comenzar
+          {m.start()}
         </Button>
         <Button onClick={stop} disabled={!isRunning}>
-          Parar
+          {m.stop()}
         </Button>
         <Button onClick={reset} disabled={isRunning}>
-          Reiniciar
+          {m.reset()}
         </Button>
       </div>
     </div>

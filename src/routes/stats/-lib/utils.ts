@@ -1,38 +1,42 @@
-import { Duration } from 'luxon'
+import { getLocale } from '@/lib/i18n'
+
+function formatUnit(value: number, unit: 'day' | 'hour' | 'minute' | 'second'): string {
+  return new Intl.NumberFormat(getLocale(), { style: 'unit', unit, unitDisplay: 'short' }).format(value)
+}
 
 export function formatSeconds(sec: number): string {
-  const dur = Duration.fromObject({ seconds: sec }).shiftTo('days', 'hours', 'minutes', 'seconds').toObject()
+  const days = Math.floor(sec / 86400)
+  const hours = Math.floor((sec % 86400) / 3600)
+  const minutes = Math.floor((sec % 3600) / 60)
+  const seconds = Math.floor(sec % 60)
 
-  const d = Math.floor(dur.days ?? 0)
-  const h = Math.floor(dur.hours ?? 0)
-  const m = Math.floor(dur.minutes ?? 0)
-  const s = Math.floor(dur.seconds ?? 0)
-
-  if (d > 0) return `${d}d ${h}h ${m > 0 ? `${m}m` : ''}`
-  if (h > 0) return `${h}h ${m}m ${s}s`
-  if (m > 0) return `${m}m ${s}s`
-  return `${s}s`
+  if (days > 0)
+    return [
+      formatUnit(days, 'day'),
+      formatUnit(hours, 'hour'),
+      ...(minutes > 0 ? [formatUnit(minutes, 'minute')] : []),
+    ].join(' ')
+  if (hours > 0)
+    return [formatUnit(hours, 'hour'), formatUnit(minutes, 'minute'), formatUnit(seconds, 'second')].join(' ')
+  if (minutes > 0) return [formatUnit(minutes, 'minute'), formatUnit(seconds, 'second')].join(' ')
+  return formatUnit(seconds, 'second')
 }
 
 export function formatMinutes(min: number): string {
-  const dur = Duration.fromObject({ minutes: min }).shiftTo('days', 'hours', 'minutes').toObject()
+  const days = Math.floor(min / 1440)
+  const hours = Math.floor((min % 1440) / 60)
+  const minutes = Math.floor(min % 60)
 
-  const d = Math.floor(dur.days ?? 0)
-  const h = Math.floor(dur.hours ?? 0)
-  const m = Math.floor(dur.minutes ?? 0)
-
-  if (d > 0) return `${d}d ${h}h ${m > 0 ? `${m}m` : ''}`
-  if (h > 0) return `${h}h ${m > 0 ? `${m}m` : ''}`
-  if (m > 0) return `${m}m`
-  return `0m`
+  if (days > 0)
+    return [
+      formatUnit(days, 'day'),
+      formatUnit(hours, 'hour'),
+      ...(minutes > 0 ? [formatUnit(minutes, 'minute')] : []),
+    ].join(' ')
+  if (hours > 0) return [formatUnit(hours, 'hour'), ...(minutes > 0 ? [formatUnit(minutes, 'minute')] : [])].join(' ')
+  return formatUnit(minutes, 'minute')
 }
 
 export function formatPercentage(value: number): string {
-  // Round to 1 decimal place for readability
-  const rounded = Math.round(value * 10) / 10
-
-  // Remove unnecessary decimal if it's a whole number
-  const formatted = rounded % 1 === 0 ? rounded.toString() : rounded.toFixed(1)
-
-  return `${formatted} %`
+  return new Intl.NumberFormat(getLocale(), { style: 'percent', maximumFractionDigits: 1 }).format(value / 100)
 }

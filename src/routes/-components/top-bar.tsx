@@ -1,5 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { BarChart, Pause, Play, Settings, SkipForward } from 'lucide-react'
+import { m } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { useMusicPlayer } from '@/providers/music-provider'
@@ -21,37 +22,38 @@ export function TopBar() {
       <nav className="bg-card/80 grid grid-cols-[1fr_1fr_1fr] gap-4 border-b p-4">
         <div className="flex justify-start gap-4">
           <Button size="icon" asChild>
-            <Link to="/stats" viewTransition={{ types: ['slide-right'] }}>
+            <Link aria-label={m.stats()} to="/stats" viewTransition={{ types: ['slide-right'] }}>
               <BarChart />
             </Link>
           </Button>
         </div>
 
         <div className="flex justify-center gap-4">
-          <Button size="icon" onClick={play} disabled={isPlaying}>
+          <Button size="icon" aria-label={m.play_music()} onClick={play} disabled={isPlaying}>
             <Play />
           </Button>
-          <Button size="icon" onClick={pause} disabled={!isPlaying}>
+          <Button size="icon" aria-label={m.pause_music()} onClick={pause} disabled={!isPlaying}>
             <Pause />
           </Button>
-          <Button size="icon" onClick={next}>
+          <Button size="icon" aria-label={m.next_track()} onClick={next}>
             <SkipForward />
           </Button>
         </div>
 
         <div className="flex justify-end gap-4">
           <Button size="icon" asChild>
-            <Link to="/settings" viewTransition={{ types: ['slide-left'] }}>
+            <Link aria-label={m.settings()} to="/settings" viewTransition={{ types: ['slide-left'] }}>
               <Settings />
             </Link>
           </Button>
         </div>
       </nav>
       <div className="flex flex-col justify-center gap-4 p-4">
-        <div className="text-center">{music?.title ?? 'No Selected'}</div>
+        <div className="text-center">{music?.title ?? m.no_music_selected()}</div>
         {/* Progress slider */}
         <div className="flex w-full px-4 sm:justify-center">
           <Slider
+            aria-label={m.music_progress()}
             value={[progress]}
             max={duration}
             step={0.1}

@@ -2,6 +2,7 @@ import { Moon, Sun, SunMoon } from 'lucide-react'
 import type { Theme } from '@/providers/theme-provider'
 import type { LucideProps } from 'lucide-react'
 import type { ForwardRefExoticComponent, RefAttributes } from 'react'
+import { m } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { useTheme } from '@/providers/theme-provider'
 
@@ -33,7 +34,7 @@ export default function ThemeSelector() {
   }
 
   return (
-    <Button size="icon" onClick={handleClick}>
+    <Button aria-label={m.change_theme()} size="icon" onClick={handleClick}>
       <ThemeIcon className="size-8" />
     </Button>
   )

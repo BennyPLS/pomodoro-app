@@ -5,6 +5,7 @@ import { env } from '@/env'
 import { MusicPlayerProvider } from '@/providers/music-provider'
 import { ThemeProvider } from '@/providers/theme-provider'
 import { TimerProvider } from '@/providers/timer-provider'
+import { useLocale } from '@/lib/i18n'
 import FirstTimeVisitScript from '@/scripts/first-time-visit'
 
 export const Route = createRootRoute({
@@ -16,7 +17,7 @@ export const Route = createRootRoute({
       <MusicPlayerProvider>
         <TimerProvider>
           <ThemeProvider>
-            <Outlet />
+            <LocalizedOutlet />
           </ThemeProvider>
         </TimerProvider>
       </MusicPlayerProvider>
@@ -25,3 +26,10 @@ export const Route = createRootRoute({
     </>
   ),
 })
+
+// Refresh route-local translations and form errors without restarting the timer,
+// music player, or theme providers, and without navigating to a new document.
+function LocalizedOutlet() {
+  const locale = useLocale()
+  return <Outlet key={locale} />
+}

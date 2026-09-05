@@ -1,3 +1,4 @@
+import { paraglideVitePlugin } from '@inlang/paraglide-js'
 // vite.config.ts
 import viteReact from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
@@ -11,6 +12,11 @@ export default defineConfig({
   preview: { allowedHosts: true },
   server: { port: 3000 },
   plugins: [
+    paraglideVitePlugin({
+      project: './project.inlang',
+      outdir: './src/paraglide',
+      strategy: ['localStorage', 'preferredLanguage', 'baseLocale'],
+    }),
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     tailwindcss(),
     viteReact({

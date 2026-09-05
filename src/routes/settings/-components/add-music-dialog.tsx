@@ -15,17 +15,24 @@ import {
 } from '@/components/ui/dialog'
 import { useAppForm } from '@/hooks/form'
 import db from '@/lib/db'
+import { m } from '@/lib/i18n'
 
-const MP3_FILE = z.custom<File>((file) => {
-  const isFile = file instanceof File
-  if (!isFile) return false
+const MP3_FILE = z.custom<File>(
+  (file) => {
+    const isFile = file instanceof File
+    if (!isFile) return false
 
-  return file.type == 'audio/mpeg'
-}, 'Requerido')
+    return file.type == 'audio/mpeg'
+  },
+  { error: () => m.invalid_mp3() },
+)
 
 type NewMusicForm = z.infer<typeof NEW_MUSIC_FORM>
 const NEW_MUSIC_FORM = z.object({
-  title: z.string().min(1, 'Requerido').max(255, 'Demasiado Largo'),
+  title: z
+    .string()
+    .min(1, { error: () => m.required() })
+    .max(255, { error: () => m.title_too_long() }),
   blob: MP3_FILE,
 })
 
@@ -53,7 +60,7 @@ export function AddMusicDialog({ isLoading }: { isLoading: boolean }) {
       }
 
       const title = await db.music.add(musicData)
-      toast.success(`Se ha guardado la musica: ${title}`)
+      toast.success(m.music_saved({ title }))
 
       form.reset()
       fileInputRef.current!.value = ''
@@ -73,13 +80,13 @@ export function AddMusicDialog({ isLoading }: { isLoading: boolean }) {
       <DialogTrigger asChild>
         <Button className="gap-2" disabled={isLoading}>
           <Plus className="h-4 w-4" />
-          Añadir Musica
+          {m.add_music()}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center text-2xl font-bold">Añadir Musica</DialogTitle>
-          <DialogDescription>Sube archivos MP3 para tu colección de música.</DialogDescription>
+          <DialogTitle className="text-center text-2xl font-bold">{m.add_music()}</DialogTitle>
+          <DialogDescription>{m.upload_music_mp3()}</DialogDescription>
         </DialogHeader>
 
         <Form form={form}>
@@ -87,18 +94,20 @@ export function AddMusicDialog({ isLoading }: { isLoading: boolean }) {
             validators={{
               onBlurAsync: async ({ value }) => {
                 const music = await db.music.get(value)
-                return music ? 'Titulo ya existe' : null
+                return music ? m.title_exists() : null
               },
             }}
             name="title"
           >
-            {(field) => <field.Input label="Titulo" />}
+            {(field) => <field.Input label={m.music_title()} />}
           </form.AppField>
 
-          <form.AppField name="blob">{(field) => <field.FileInput label="Archivo" ref={fileInputRef} />}</form.AppField>
+          <form.AppField name="blob">
+            {(field) => <field.FileInput label={m.music_file()} ref={fileInputRef} />}
+          </form.AppField>
 
           <DialogFooter>
-            <form.SubmitButton label="Add Music" />
+            <form.SubmitButton label={m.add_music()} />
           </DialogFooter>
         </Form>
       </DialogContent>

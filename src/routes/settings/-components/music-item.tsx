@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import { motion, useAnimate } from 'motion/react'
 import type { Music } from '@/lib/db'
 import type { PanInfo } from 'motion'
+import { m } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { useAudioPlayer } from '@/hooks/use-audio-player'
 import db from '@/lib/db'
@@ -24,7 +25,7 @@ export function MusicItem({ music: { blob, title, order }, isFirst, isLast, allM
     if (isFirst) return
 
     // Find the item above this one
-    const itemAbove = allMusic.find((m) => m.order === order - 1)
+    const itemAbove = allMusic.find((item) => item.order === order - 1)
     if (!itemAbove) return
 
     // Swap the orders
@@ -36,7 +37,7 @@ export function MusicItem({ music: { blob, title, order }, isFirst, isLast, allM
     if (isLast) return
 
     // Find the item below this one
-    const itemBelow = allMusic.find((m) => m.order === order + 1)
+    const itemBelow = allMusic.find((item) => item.order === order + 1)
     if (!itemBelow) return
 
     // Swap the orders
@@ -48,7 +49,7 @@ export function MusicItem({ music: { blob, title, order }, isFirst, isLast, allM
     await db.music.delete(title)
 
     // Update the order of items after this one
-    const itemsAfter = allMusic.filter((m) => m.order > order)
+    const itemsAfter = allMusic.filter((item) => item.order > order)
     for (const item of itemsAfter) {
       await db.music.update(item.title, {
         order: item.order - 1,
@@ -79,17 +80,22 @@ export function MusicItem({ music: { blob, title, order }, isFirst, isLast, allM
         whileDrag={{ cursor: 'grabbing' }}
         onDragEnd={handleDragEnd}
       >
-        <Button size="icon" variant="outline" onClick={() => controls.toggle()}>
+        <Button
+          size="icon"
+          variant="outline"
+          aria-label={isPlaying ? m.pause_music() : m.play_music()}
+          onClick={() => controls.toggle()}
+        >
           <PlayPauseIcon />
         </Button>
 
         <h2 className="truncate text-base font-semibold">{title}</h2>
 
         <div className="ml-auto flex gap-2">
-          <Button size="icon" variant="outline" onClick={moveUp} disabled={isFirst}>
+          <Button size="icon" variant="outline" aria-label={m.move_up()} onClick={moveUp} disabled={isFirst}>
             <ArrowUp className="h-4 w-4" />
           </Button>
-          <Button size="icon" variant="outline" onClick={moveDown} disabled={isLast}>
+          <Button size="icon" variant="outline" aria-label={m.move_down()} onClick={moveDown} disabled={isLast}>
             <ArrowDown className="h-4 w-4" />
           </Button>
         </div>

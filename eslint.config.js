@@ -59,6 +59,15 @@ export default [
 
   // Ignore build artifacts
   {
-    ignores: ['node_modules/**', 'dist/**', 'build/**', '.tanstack/**', 'eslint.config.js', 'prettier.config.js'],
+    ignores: [
+      'src/paraglide/**',
+      'node_modules/**',
+      'dist/**',
+      'dev-dist/**',
+      'build/**',
+      '.tanstack/**',
+      'eslint.config.js',
+      'prettier.config.js',
+    ],
   },
 ]

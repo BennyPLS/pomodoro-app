@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { DateTime } from 'luxon'
 import type { Session } from '@/lib/db'
+import { getLocale } from '@/lib/i18n'
 
 export type DailyStat = {
   // actual DateTime for the day (start of day)
@@ -62,7 +63,7 @@ export function useDaily(sessions: Array<Session> | null | undefined) {
       const recorded = work + rest
       const workPercentage = recorded === 0 ? 0 : (work / recorded) * 100
 
-      const label = cursor.toLocaleString({ month: 'short', day: 'numeric' })
+      const label = cursor.setLocale(getLocale()).toLocaleString({ month: 'short', day: 'numeric' })
 
       result.push({
         date: cursor,

@@ -5,6 +5,7 @@ import type { ChangeEvent } from 'react'
 import type { Task, TaskStatus } from '@/lib/db'
 import type { IconComponent } from '@/lib/types'
 import type { PanInfo } from 'motion'
+import { m } from '@/lib/i18n'
 import db from '@/lib/db'
 import { Button } from '@/components/ui/button'
 import { Item, ItemActions, ItemContent, ItemMedia } from '@/components/ui/item'
@@ -81,6 +82,7 @@ export default function TaskItem({
               variant="outline"
               size="icon"
               onClick={() => handleStatusChange(task.uuid, task.status)}
+              aria-label={m.change_task_status()}
               data-status={task.status}
               className='data-[status="todo"]:text-chart-3 data-[status="doing"]:text-chart-4 data-[status="done"]:text-chart-1'
             >
@@ -88,11 +90,11 @@ export default function TaskItem({
             </Button>
           </ItemMedia>
           <ItemContent>
-            <Input value={inputValue} onChange={handleOnChange} />
+            <Input aria-label={m.task_name()} value={inputValue} onChange={handleOnChange} />
           </ItemContent>
           <ItemActions>
             {task.tasks !== undefined && (
-              <Button variant="outline" size="icon" onClick={() => setSubTaskAdd(true)}>
+              <Button variant="outline" size="icon" aria-label={m.add_subtask()} onClick={() => setSubTaskAdd(true)}>
                 <ClipboardPlus />
               </Button>
             )}

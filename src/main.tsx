@@ -1,9 +1,14 @@
+import { z } from 'zod'
 import { scan } from 'react-scan'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
 import ReactDOM from 'react-dom/client'
 import { routeTree } from '@/routeTree.gen'
 import './styles.css'
 import { env } from '@/env'
+import { getLocale } from '@/lib/i18n'
+
+document.documentElement.lang = getLocale()
+z.config(z.locales[getLocale()]())
 
 if (env.VITE_ENV === 'development') {
   scan({ enabled: true })

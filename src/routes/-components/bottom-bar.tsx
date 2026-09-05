@@ -1,6 +1,7 @@
 import { ClipboardList, Volume, Volume1, Volume2, VolumeX } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
+import { m } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Slider } from '@/components/ui/slider'
 import { useMusicPlayer } from '@/providers/music-provider'
@@ -20,6 +21,7 @@ export function BottomBar() {
           <div className="flex grow justify-center gap-2">
             <Button
               size="icon"
+              aria-label={volume === 0 ? m.unmute() : m.mute()}
               onClick={() => {
                 if (volume === 0) {
                   setOldVolume(0)
@@ -33,6 +35,7 @@ export function BottomBar() {
               <VolumeIcon className="size-16" />
             </Button>
             <Slider
+              aria-label={m.volume()}
               value={[volume]}
               max={1}
               step={0.01}
@@ -45,7 +48,7 @@ export function BottomBar() {
         </div>
       </div>
       <Button variant="outline" size="icon" className="w-full rounded-none border-0 border-t" asChild>
-        <Link to="/tasks" viewTransition={{ types: ['slide-drawer-up'] }}>
+        <Link aria-label={m.tasks()} to="/tasks" viewTransition={{ types: ['slide-drawer-up'] }}>
           <ClipboardList />
         </Link>
       </Button>
