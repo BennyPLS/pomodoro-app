@@ -6,7 +6,6 @@ import pluginQuery from '@tanstack/eslint-plugin-query'
 import prettier from 'eslint-config-prettier'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
-import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 
 export default [
@@ -32,10 +31,11 @@ export default [
       },
     },
 
+    // `@typescript-eslint` is already registered by tanstackConfig; re-registering it
+    // here would throw "Cannot redefine plugin". Its rules stay usable below.
     plugins: {
       react: reactPlugin,
       'react-hooks': reactHooks,
-      '@typescript-eslint': tsPlugin,
     },
 
     settings: {

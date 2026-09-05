@@ -104,8 +104,10 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-  React.ComponentProps<'div'> & {
+}: React.ComponentProps<'div'> &
+  // recharts 3 reads `active`/`payload`/`label` from context rather than props,
+  // so they live on TooltipContentProps instead of the Tooltip props.
+  Partial<RechartsPrimitive.TooltipContentProps> & {
     hideLabel?: boolean
     hideIndicator?: boolean
     indicator?: 'line' | 'dot' | 'dashed'
@@ -159,7 +161,7 @@ function ChartTooltipContent({
 
             return (
               <div
-                key={item.dataKey}
+                key={`${item.dataKey}`}
                 className={cn(
                   '[&>svg]:text-muted-foreground flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5',
                   indicator === 'dot' && 'items-center',
@@ -224,7 +226,8 @@ function ChartLegendContent({
   verticalAlign = 'bottom',
   nameKey,
 }: React.ComponentProps<'div'> &
-  Pick<RechartsPrimitive.LegendProps, 'payload' | 'verticalAlign'> & {
+  Pick<RechartsPrimitive.LegendProps, 'verticalAlign'> & {
+    payload?: ReadonlyArray<RechartsPrimitive.LegendPayload>
     hideIcon?: boolean
     nameKey?: string
   }) {
@@ -279,13 +282,13 @@ function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key:
   let configLabelKey: string = key
 
   if (key in payload && typeof payload[key as keyof typeof payload] === 'string') {
-    configLabelKey = payload[key as keyof typeof payload] as string
+    configLabelKey = payload[key as keyof typeof payload]
   } else if (
     payloadPayload &&
     key in payloadPayload &&
     typeof payloadPayload[key as keyof typeof payloadPayload] === 'string'
   ) {
-    configLabelKey = payloadPayload[key as keyof typeof payloadPayload] as string
+    configLabelKey = payloadPayload[key as keyof typeof payloadPayload]
   }
 
   return configLabelKey in config ? config[configLabelKey] : config[key]

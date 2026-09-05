@@ -102,9 +102,12 @@ function Page() {
                 <YAxis yAxisId="left" orientation="left" tickFormatter={formatMinutes} domain={[0, 'dataMax']} />
                 <YAxis yAxisId="right" orientation="right" tickFormatter={formatPercentage} domain={[0, 100]} />
                 <Tooltip
-                  formatter={(value: number, name: any) => {
+                  formatter={(value, name) => {
+                    // recharts 3 types `value` as ValueType | undefined; this chart's
+                    // series are all numeric, so anything else passes through as-is.
+                    if (typeof value !== 'number') return [String(value ?? ''), name ?? '']
                     if (name === m.work_percentage()) return [formatPercentage(value), name]
-                    return [formatMinutes(value), name]
+                    return [formatMinutes(value), name ?? '']
                   }}
                 />
                 <Legend />
