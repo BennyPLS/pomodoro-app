@@ -11,7 +11,7 @@ export function TopBar() {
       <h1 className="flex items-center justify-center gap-4 text-2xl">{m.stats()}</h1>
 
       <div className="flex justify-end gap-4">
-        <Button size="icon">
+        <Button size="icon" asChild>
           <Link aria-label={m.back()} to="/" viewTransition={{ types: ['slide-left'] }}>
             <Undo2 className="-scale-x-100" />
           </Link>
