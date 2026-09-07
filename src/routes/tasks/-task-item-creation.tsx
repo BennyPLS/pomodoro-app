@@ -52,9 +52,6 @@ export function TaskItemCreation({
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') void form.handleSubmit()
-                }}
               />
             )}
           />

@@ -22,7 +22,9 @@ function RouteComponent() {
       })
   })
 
-  const [isAdding, setIsAdding] = useState(false)
+  // Only one creation input may be open at a time: `null` when none is open,
+  // `{}` for a new root task, or `{ parent }` for a subtask of `parent`.
+  const [creating, setCreating] = useState<{ parent?: string } | null>(null)
 
   const remove = async (uuid: string) => {
     await db.tasks.bulkDelete([uuid, ...(groupedTasks?.find((t) => t.uuid === uuid)?.tasks.map((t) => t.uuid) ?? [])])
@@ -47,12 +49,18 @@ function RouteComponent() {
         <h1 className="flex items-center justify-center gap-4 px-4 text-2xl">{m.tasks()}</h1>
         <div className="flex flex-grow flex-col gap-2 overflow-x-hidden overflow-y-scroll px-4">
           {groupedTasks?.map((task) => (
-            <TaskItem key={task.uuid} task={task} remove={remove} />
+            <TaskItem
+              key={task.uuid}
+              task={task}
+              remove={remove}
+              subTaskAdd={creating?.parent ?? null}
+              setSubTaskAdd={(parent) => setCreating(parent === null ? null : { parent })}
+            />
           ))}
-          {isAdding ? (
-            <TaskItemCreation onCreation={() => setIsAdding(false)} onCancel={() => setIsAdding(false)} />
+          {creating !== null && creating.parent === undefined ? (
+            <TaskItemCreation onCreation={() => setCreating(null)} onCancel={() => setCreating(null)} />
           ) : (
-            <Button aria-label={m.add_task()} className="w-full" onClick={() => setIsAdding(true)}>
+            <Button aria-label={m.add_task()} className="w-full" onClick={() => setCreating({})}>
               <Plus />
             </Button>
           )}

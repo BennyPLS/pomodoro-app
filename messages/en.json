@@ -91,6 +91,7 @@
   "task_name": "Task name",
   "add_subtask": "Add subtask",
   "change_task_status": "Change task status",
+  "delete_task": "Delete task",
   "move_up": "Move up",
   "move_down": "Move down",
   "change_theme": "Change theme",

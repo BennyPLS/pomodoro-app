@@ -91,6 +91,7 @@
   "task_name": "Nombre de la tarea",
   "add_subtask": "Añadir subtarea",
   "change_task_status": "Cambiar estado de la tarea",
+  "delete_task": "Eliminar tarea",
   "move_up": "Subir",
   "move_down": "Bajar",
   "change_theme": "Cambiar tema",

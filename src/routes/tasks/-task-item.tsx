@@ -1,6 +1,6 @@
 import { motion, useAnimate } from 'motion/react'
 import { useEffect, useState } from 'react'
-import { Clipboard, ClipboardCheck, ClipboardClock, ClipboardPlus } from 'lucide-react'
+import { Clipboard, ClipboardCheck, ClipboardClock, ClipboardPlus, Trash2 } from 'lucide-react'
 import type { ChangeEvent } from 'react'
 import type { Task, TaskStatus } from '@/lib/db'
 import type { IconComponent } from '@/lib/types'
@@ -27,13 +27,16 @@ function getNextStatus(status: TaskStatus): TaskStatus {
 export default function TaskItem({
   task,
   remove,
+  subTaskAdd,
+  setSubTaskAdd,
 }: {
   task: Task & { tasks?: Array<Task> }
   remove: (id: string) => void | Promise<void>
+  subTaskAdd: string | null
+  setSubTaskAdd: (uuid: string | null) => void
 }) {
   const [scope, animate] = useAnimate()
   const [inputValue, setInputValue] = useState(task.name)
-  const [subTaskAdd, setSubTaskAdd] = useState(false)
 
   const handleStatusChange = async (uuid: string, status: TaskStatus) => {
     const next = getNextStatus(status)
@@ -94,10 +97,23 @@ export default function TaskItem({
           </ItemContent>
           <ItemActions>
             {task.tasks !== undefined && (
-              <Button variant="outline" size="icon" aria-label={m.add_subtask()} onClick={() => setSubTaskAdd(true)}>
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label={m.add_subtask()}
+                onClick={() => setSubTaskAdd(task.uuid)}
+              >
                 <ClipboardPlus />
               </Button>
             )}
+            <Button
+              variant="outline-destructive"
+              size="icon"
+              aria-label={m.delete_task()}
+              onClick={() => void remove(task.uuid)}
+            >
+              <Trash2 />
+            </Button>
           </ItemActions>
         </motion.div>
       </Item>
@@ -105,14 +121,16 @@ export default function TaskItem({
         <>
           <div className="ml-10 flex flex-col gap-2">
             {task.tasks.map((t) => {
-              return <TaskItem key={t.uuid} task={t} remove={remove} />
+              return (
+                <TaskItem key={t.uuid} task={t} remove={remove} subTaskAdd={subTaskAdd} setSubTaskAdd={setSubTaskAdd} />
+              )
             })}
           </div>
-          {subTaskAdd && (
+          {subTaskAdd === task.uuid && (
             <TaskItemCreation
               parent={task.uuid}
-              onCreation={() => setSubTaskAdd(false)}
-              onCancel={() => setSubTaskAdd(false)}
+              onCreation={() => setSubTaskAdd(null)}
+              onCancel={() => setSubTaskAdd(null)}
             />
           )}
         </>
