@@ -1,12 +1,16 @@
+import { Suspense, lazy } from 'react'
 import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
 import { Toaster } from '@/components/ui/sonner'
-import Devtools from '@/dev-tools'
-import { env } from '@/env'
 import { MusicPlayerProvider } from '@/providers/music-provider'
 import { ThemeProvider } from '@/providers/theme-provider'
 import { TimerProvider } from '@/providers/timer-provider'
 import { useLocale } from '@/lib/i18n'
 import FirstTimeVisitScript from '@/scripts/first-time-visit'
+
+// Dev-only: `import.meta.env.DEV` is statically false in production builds, so
+// the dynamic import is tree-shaken and no devtools chunk is emitted at all
+// (important here: the service worker precaches `**/*`).
+const Devtools = import.meta.env.DEV ? lazy(() => import('@/dev-tools')) : null
 
 export const Route = createRootRoute({
   component: () => (
@@ -21,7 +25,11 @@ export const Route = createRootRoute({
           </ThemeProvider>
         </TimerProvider>
       </MusicPlayerProvider>
-      {env.VITE_ENV === 'development' && <Devtools />}
+      {Devtools && (
+        <Suspense fallback={null}>
+          <Devtools />
+        </Suspense>
+      )}
       <FirstTimeVisitScript />
     </>
   ),

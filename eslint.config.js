@@ -2,7 +2,6 @@
 
 import { tanstackConfig } from '@tanstack/eslint-config'
 import pluginRouter from '@tanstack/eslint-plugin-router'
-import pluginQuery from '@tanstack/eslint-plugin-query'
 import prettier from 'eslint-config-prettier'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
@@ -14,9 +13,6 @@ export default [
 
   // TanStack Router recommended rules
   ...pluginRouter.configs['flat/recommended'],
-
-  // TanStack Query recommended rules
-  ...pluginQuery.configs['flat/recommended'],
 
   // Your app-specific configuration
   {
