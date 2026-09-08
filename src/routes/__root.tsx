@@ -17,10 +17,10 @@ export const Route = createRootRoute({
     <>
       <HeadContent />
       <Scripts />
-      <Toaster richColors={true} />
       <MusicPlayerProvider>
         <TimerProvider>
           <ThemeProvider>
+            <Toaster richColors={true} />
             <LocalizedOutlet />
           </ThemeProvider>
         </TimerProvider>

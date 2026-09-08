@@ -5,6 +5,9 @@ import { routeTree } from '@/routeTree.gen'
 import './styles.css'
 import { env } from '@/env'
 import { getLocale } from '@/lib/i18n'
+import { applyAppearance, readAppearance } from '@/lib/themes'
+
+applyAppearance(readAppearance())
 
 document.documentElement.lang = getLocale()
 z.config(z.locales[getLocale()]())

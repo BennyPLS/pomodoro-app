@@ -15,7 +15,7 @@ export function FocusMilestones({
       {milestones.map((milestone) => (
         <div
           key={milestone.id}
-          className="from-card/70 to-muted/40 rounded-xl border bg-gradient-to-br p-3 shadow-sm transition-all hover:shadow-md"
+          className="from-card/70 to-muted/40 rounded-xl border bg-linear-to-br p-3 shadow-sm transition-all hover:shadow-md"
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-3">

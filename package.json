@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "start": "vite preview --host --port 3000",
     "lint": "eslint",
+    "test:themes": "node --experimental-strip-types --test tests/themes.test.mjs",
     "format": "prettier --write .",
     "fix": "prettier --write . && eslint --fix",
     "machine-translate": "inlang machine translate --project project.inlang"

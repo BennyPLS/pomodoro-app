@@ -1,5 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
+import { Music2 } from 'lucide-react'
+import { getLocale, m, setLocale } from '@/lib/i18n'
+import { isLocale } from '@/paraglide/runtime'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
 import { Spinner } from '@/components/ui/spinner'
@@ -7,25 +10,25 @@ import { Switch } from '@/components/ui/switch'
 import { useLocalStorageJson } from '@/hooks/use-local-storage'
 import db from '@/lib/db'
 import { AddMusicDialog } from '@/routes/settings/-components/add-music-dialog'
+import { AppearanceSettings } from '@/routes/settings/-components/appearance-settings'
 import { MusicItem } from '@/routes/settings/-components/music-item'
 import { TopBar } from '@/routes/settings/-components/top-bar'
-import { getLocale, m, setLocale } from '@/lib/i18n'
-import { isLocale } from '@/paraglide/runtime'
 
-export const Route = createFileRoute('/settings')({
-  component: Page,
-})
+export const Route = createFileRoute('/settings')({ component: Page })
+
 function Page() {
   const [automaticReproduction, setAutomaticReproduction] = useLocalStorageJson('pomodoro-smart-music', true)
   const music = useLiveQuery(() => db.music.toArray().then((items) => items.sort((a, b) => a.order - b.order)))
-
   const isLoading = music === undefined
 
   return (
-    <div className="flex h-svh flex-col gap-4 [view-transition-name:main-content]">
+    <div className="min-h-svh [view-transition-name:main-content]">
       <TopBar />
-      <main className="relative mx-auto flex w-full max-w-xl flex-col gap-4 py-4">
-        <div className="grid min-h-10 grid-cols-[minmax(0,1fr)_10rem] items-center gap-4 px-4">
+      <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6 sm:px-6 sm:py-10">
+        <section
+          className="bg-card flex flex-wrap items-center justify-between gap-4 rounded-2xl border p-5 sm:p-7"
+          aria-label={m.language()}
+        >
           <Label htmlFor="language">{m.language()}</Label>
           <Select
             value={getLocale()}
@@ -45,29 +48,38 @@ function Page() {
               </SelectItem>
             </SelectContent>
           </Select>
-        </div>
-        <div className="grid min-h-10 grid-cols-[minmax(0,1fr)_10rem] items-center gap-4 px-4">
-          <Label htmlFor="smart-music">{m.smart_music()}</Label>
-          <Switch id="smart-music" checked={automaticReproduction} onCheckedChange={setAutomaticReproduction} />
-        </div>
-        <div className="flex flex-col gap-4 overflow-y-scroll">
-          <div className="flex items-center justify-between gap-4 p-4">
-            <h1 className="text-center text-xl font-bold">{m.your_music()}</h1>
+        </section>
+        <AppearanceSettings />
+        <section aria-labelledby="music-heading" className="bg-card overflow-hidden rounded-2xl border p-5 sm:p-7">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="bg-primary/10 text-primary rounded-xl p-2.5">
+              <Music2 className="size-5" />
+            </div>
+            <div>
+              <h2 id="music-heading" className="text-xl font-semibold">
+                Música
+              </h2>
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-4 border-b pb-6">
+            <div>
+              <Label htmlFor="smart-music">{m.smart_music()}</Label>
+            </div>
+            <Switch id="smart-music" checked={automaticReproduction} onCheckedChange={setAutomaticReproduction} />
+          </div>
+          <div className="flex items-center justify-between gap-4 py-5">
+            <h3 className="text-sm font-medium">{m.your_music()}</h3>
             <AddMusicDialog isLoading={isLoading} />
           </div>
-          <div className="relative flex flex-col gap-4 overflow-x-hidden overflow-y-scroll p-4 lg:max-h-194">
-            <div
-              aria-hidden
-              className="to-background pointer-events-none absolute top-0 bottom-0 left-0 z-10 w-4 bg-gradient-to-l from-transparent"
-            />
-            <div
-              aria-hidden
-              className="to-background pointer-events-none absolute top-0 right-0 bottom-0 z-10 w-4 bg-gradient-to-r from-transparent"
-            />
+          <div className="flex flex-col gap-3 overflow-x-hidden">
             {isLoading ? (
-              <div className="flex justify-center">
+              <div className="flex justify-center py-6" role="status" aria-label="Cargando música">
                 <Spinner />
               </div>
+            ) : music.length === 0 ? (
+              <p className="text-muted-foreground rounded-xl border border-dashed p-6 text-center text-sm">
+                Añade tu primera canción para acompañar tus sesiones.
+              </p>
             ) : (
               music.map((item, index) => (
                 <MusicItem
@@ -80,7 +92,7 @@ function Page() {
               ))
             )}
           </div>
-        </div>
+        </section>
       </main>
     </div>
   )
