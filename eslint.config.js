@@ -2,11 +2,9 @@
 
 import { tanstackConfig } from '@tanstack/eslint-config'
 import pluginRouter from '@tanstack/eslint-plugin-router'
-import pluginQuery from '@tanstack/eslint-plugin-query'
 import prettier from 'eslint-config-prettier'
 import reactPlugin from 'eslint-plugin-react'
 import reactHooks from 'eslint-plugin-react-hooks'
-import tsPlugin from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
 
 export default [
@@ -15,9 +13,6 @@ export default [
 
   // TanStack Router recommended rules
   ...pluginRouter.configs['flat/recommended'],
-
-  // TanStack Query recommended rules
-  ...pluginQuery.configs['flat/recommended'],
 
   // Your app-specific configuration
   {
@@ -32,10 +27,11 @@ export default [
       },
     },
 
+    // `@typescript-eslint` is already registered by tanstackConfig; re-registering it
+    // here would throw "Cannot redefine plugin". Its rules stay usable below.
     plugins: {
       react: reactPlugin,
       'react-hooks': reactHooks,
-      '@typescript-eslint': tsPlugin,
     },
 
     settings: {
@@ -59,6 +55,15 @@ export default [
 
   // Ignore build artifacts
   {
-    ignores: ['node_modules/**', 'dist/**', 'build/**', '.tanstack/**', 'eslint.config.js', 'prettier.config.js'],
+    ignores: [
+      'src/paraglide/**',
+      'node_modules/**',
+      'dist/**',
+      'dev-dist/**',
+      'build/**',
+      '.tanstack/**',
+      'eslint.config.js',
+      'prettier.config.js',
+    ],
   },
 ]

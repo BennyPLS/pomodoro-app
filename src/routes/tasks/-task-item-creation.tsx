@@ -1,5 +1,6 @@
 import { v7 } from 'uuid'
 import { Clipboard, Plus, X } from 'lucide-react'
+import { m } from '@/lib/i18n'
 import { useAppForm } from '@/hooks/form'
 import db from '@/lib/db'
 import { NON_EMPTY_STRING } from '@/lib/validators'
@@ -36,7 +37,7 @@ export function TaskItemCreation({
       <Form form={form} className="flex-row">
         <ItemMedia>
           <div className="border-input inline-flex size-9 items-center justify-center rounded-md border">
-            <Clipboard className="size-4" />
+            <Clipboard className="text-chart-3 size-4" />
           </div>
         </ItemMedia>
         <ItemContent>
@@ -45,22 +46,27 @@ export function TaskItemCreation({
             validators={{ onChange: NON_EMPTY_STRING }}
             children={(field) => (
               <Input
+                aria-label={m.task_name()}
+                placeholder={m.task_name()}
                 autoFocus
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') void form.handleSubmit()
-                }}
               />
             )}
           />
         </ItemContent>
         <ItemActions>
-          <Button variant="outline" size="icon" type="submit">
+          <Button variant="outline" size="icon" aria-label={m.add_task()} type="submit">
             <Plus />
           </Button>
-          <Button variant="outline-destructive" size="icon" type="reset" onClick={() => onCancel?.()}>
+          <Button
+            variant="outline-destructive"
+            size="icon"
+            aria-label={m.cancel()}
+            type="reset"
+            onClick={() => onCancel?.()}
+          >
             <X />
           </Button>
         </ItemActions>

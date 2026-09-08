@@ -1,24 +1,28 @@
+import { paraglideVitePlugin } from '@inlang/paraglide-js'
 // vite.config.ts
 import viteReact from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 import tanstackRouter from '@tanstack/router-plugin/vite'
-import tsconfigPaths from 'vite-tsconfig-paths'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
   base: process.env.VITE_ENV !== 'production' ? '' : '/pomodoro-app/',
+  // Vite 8 resolves tsconfig `paths` natively, replacing vite-tsconfig-paths.
+  resolve: { tsconfigPaths: true },
   preview: { allowedHosts: true },
   server: { port: 3000 },
   plugins: [
+    paraglideVitePlugin({
+      project: './project.inlang',
+      outdir: './src/paraglide',
+      strategy: ['localStorage', 'preferredLanguage', 'baseLocale'],
+    }),
     tanstackRouter({ target: 'react', autoCodeSplitting: true }),
     tailwindcss(),
-    viteReact({
-      babel: {
-        plugins: ['babel-plugin-react-compiler'],
-      },
-    }),
-    tsconfigPaths(),
+    // React Compiler runs through oxc in @vitejs/plugin-react v6+
+    // (the v5 `babel` option was removed).
+    viteReact({ compiler: true }),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {

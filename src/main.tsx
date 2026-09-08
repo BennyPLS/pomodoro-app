@@ -1,13 +1,20 @@
-import { scan } from 'react-scan'
+import { z } from 'zod'
 import { RouterProvider, createRouter } from '@tanstack/react-router'
-import { StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import { routeTree } from '@/routeTree.gen'
 import './styles.css'
 import { env } from '@/env'
+import { getLocale } from '@/lib/i18n'
+import { applyAppearance, readAppearance } from '@/lib/themes'
 
-if (env.VITE_ENV === 'development') {
-  scan({ enabled: true })
+applyAppearance(readAppearance())
+
+document.documentElement.lang = getLocale()
+z.config(z.locales[getLocale()]())
+
+// Dev-only: dynamic import so react-scan never enters the production graph.
+if (import.meta.env.DEV) {
+  void import('react-scan').then(({ scan }) => scan({ enabled: true }))
 }
 
 // Create a new router instance
@@ -32,9 +39,5 @@ declare module '@tanstack/react-router' {
 const rootElement = document.getElementById('app')
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement)
-  root.render(
-    <StrictMode>
-      <RouterProvider router={router} />
-    </StrictMode>,
-  )
+  root.render(<RouterProvider router={router} />)
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { RefObject } from 'react'
-import type { IndividualMode } from '@/providers/timer-provider'
+import type { IndividualMode, TimerMode } from '@/providers/timer-provider'
+import { getLocale, m } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { useLocalStorageJson } from '@/hooks/use-local-storage'
 import { useMusicPlayer } from '@/providers/music-provider'
@@ -42,11 +43,11 @@ const getDigitsFromSeconds = (
 function phaseToText(phase: IndividualMode) {
   switch (phase) {
     case 'break':
-      return 'Descanso'
+      return m.break()
     case 'work':
-      return 'Trabajo'
+      return m.work()
     case 'longBreak':
-      return 'Descanso Largo'
+      return m.long_break()
   }
 }
 
@@ -57,11 +58,6 @@ export function Timer() {
   // --- Refs ---
   const finishAudio = useRef<HTMLAudioElement | null>(null)
   const prevSecondsRef = useRef<number | null>(null)
-
-  const minutesTensRef = useRef<HTMLDivElement>(null)
-  const minutesRef = useRef<HTMLDivElement>(null)
-  const secondsTensRef = useRef<HTMLDivElement>(null)
-  const secondsRef = useRef<HTMLDivElement>(null)
 
   const [play, pause] = useMusicPlayer((store) => [store.play, store.pause])
 
@@ -99,6 +95,52 @@ export function Timer() {
     prevSecondsRef.current = remainingSeconds
   }, [remainingSeconds])
 
+  return (
+    <TimerView
+      mode={mode}
+      individualMode={individualMode}
+      remainingSeconds={remainingSeconds}
+      isRunning={isRunning}
+      orderIndex={orderIndex}
+      setMode={setMode}
+      setIndividualMode={setIndividualMode}
+      start={start}
+      stop={stop}
+      reset={reset}
+    />
+  )
+}
+
+export type TimerViewProps = {
+  mode: TimerMode
+  individualMode: IndividualMode
+  remainingSeconds: number
+  isRunning: boolean
+  orderIndex: number
+  setMode: (mode: TimerMode) => void
+  setIndividualMode: (mode: IndividualMode) => void
+  start: () => void
+  stop: () => void
+  reset: () => void
+}
+
+export function TimerView({
+  mode,
+  individualMode,
+  remainingSeconds,
+  isRunning,
+  orderIndex,
+  setMode,
+  setIndividualMode,
+  start,
+  stop,
+  reset,
+}: TimerViewProps) {
+  const minutesTensRef = useRef<HTMLDivElement>(null)
+  const minutesRef = useRef<HTMLDivElement>(null)
+  const secondsTensRef = useRef<HTMLDivElement>(null)
+  const secondsRef = useRef<HTMLDivElement>(null)
+
   // --- Visual Update Effect ---
   useEffect(() => {
     const { mt, mu, st, su } = getDigitsFromSeconds(remainingSeconds)
@@ -111,20 +153,29 @@ export function Timer() {
   // --- Accessibility Text ---
   const minutes = Math.floor(remainingSeconds / 60)
   const seconds = remainingSeconds % 60
-  const formattedAccessibleTime = `Tiempo restante: ${minutes} minuto${minutes !== 1 ? 's' : ''} ${seconds
-    .toString()
-    .padStart(2, '0')} segundos`
+  const formattedAccessibleTime = m.time_remaining({
+    minutes: new Intl.NumberFormat(getLocale(), { style: 'unit', unit: 'minute', unitDisplay: 'long' }).format(minutes),
+    seconds: new Intl.NumberFormat(getLocale(), { style: 'unit', unit: 'second', unitDisplay: 'long' }).format(seconds),
+  })
 
   // --- Render ---
   return (
     <div className="flex flex-col items-center justify-center gap-2">
       {/* Mode Buttons */}
       <div className="flex gap-4">
-        <Button onClick={() => setMode('infinite')} variant={mode === 'infinite' ? 'default' : 'outline'}>
-          Infinito
+        <Button
+          onClick={() => setMode('infinite')}
+          variant={mode === 'infinite' ? 'default' : 'outline'}
+          aria-pressed={mode === 'infinite'}
+        >
+          {m.infinity()}
         </Button>
-        <Button onClick={() => setMode('individually')} variant={mode === 'individually' ? 'default' : 'outline'}>
-          Individual
+        <Button
+          onClick={() => setMode('individually')}
+          variant={mode === 'individually' ? 'default' : 'outline'}
+          aria-pressed={mode === 'individually'}
+        >
+          {m.individually()}
         </Button>
       </div>
 
@@ -137,23 +188,23 @@ export function Timer() {
               onClick={() => setIndividualMode('work')}
               variant={individualMode === 'work' ? 'secondary' : 'ghost'}
             >
-              Trabajo
+              {m.work()}
             </Button>
             <Button
               onClick={() => setIndividualMode('break')}
               variant={individualMode === 'break' ? 'secondary' : 'ghost'}
             >
-              Descanso
+              {m.break()}
             </Button>
             <Button
               onClick={() => setIndividualMode('longBreak')}
               variant={individualMode === 'longBreak' ? 'secondary' : 'ghost'}
             >
-              Descanso Largo
+              {m.long_break()}
             </Button>
           </div>
         ) : (
-          <div>Fase: {phaseToText(getCurrentInfinityPhase(orderIndex))}</div>
+          <div>{phaseToText(getCurrentInfinityPhase(orderIndex))}</div>
         )}
       </div>
 
@@ -165,7 +216,7 @@ export function Timer() {
 
         <div className="relative flex h-50 overflow-hidden py-10 text-center text-9xl" aria-hidden="true">
           {/* Fades */}
-          <div className="to-background/0 from-background pointer-events-none absolute inset-x-0 top-0 z-10 h-10 bg-gradient-to-b" />
+          <div className="to-background/0 from-background pointer-events-none absolute inset-x-0 top-0 z-10 h-10 bg-linear-to-b" />
 
           {/* Digits */}
           {/* Note: The 'style' is now controlled by the Visual Update Effect */}
@@ -223,20 +274,20 @@ export function Timer() {
             </div>
           </div>
 
-          <div className="from-background/0 to-background pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 bg-gradient-to-b" />
+          <div className="from-background/0 to-background pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 bg-linear-to-b" />
         </div>
       </div>
 
       {/* Control Buttons */}
       <div className="mt-2 flex gap-4">
         <Button onClick={start} disabled={isRunning || remainingSeconds === 0}>
-          Comenzar
+          {m.start()}
         </Button>
         <Button onClick={stop} disabled={!isRunning}>
-          Parar
+          {m.stop()}
         </Button>
         <Button onClick={reset} disabled={isRunning}>
-          Reiniciar
+          {m.reset()}
         </Button>
       </div>
     </div>

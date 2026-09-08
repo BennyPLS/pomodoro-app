@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import db from '@/lib/db'
 import { TaskItemCreation } from '@/routes/tasks/-task-item-creation'
 import TaskItem from '@/routes/tasks/-task-item'
+import { m } from '@/lib/i18n'
 
 export const Route = createFileRoute('/tasks')({
   component: RouteComponent,
@@ -21,7 +22,9 @@ function RouteComponent() {
       })
   })
 
-  const [isAdding, setIsAdding] = useState(false)
+  // Only one creation input may be open at a time: `null` when none is open,
+  // `{}` for a new root task, or `{ parent }` for a subtask of `parent`.
+  const [creating, setCreating] = useState<{ parent?: string } | null>(null)
 
   const remove = async (uuid: string) => {
     await db.tasks.bulkDelete([uuid, ...(groupedTasks?.find((t) => t.uuid === uuid)?.tasks.map((t) => t.uuid) ?? [])])
@@ -30,20 +33,34 @@ function RouteComponent() {
   return (
     <div className="bg-background flex h-svh w-screen flex-col [view-transition-name:main-content]">
       <Button variant="outline" className="w-full rounded-none border-0 border-b" asChild>
-        <Link to="/" viewTransition={{ types: ['slide-drawer-down'] }}>
+        <Link aria-label={m.back()} to="/" viewTransition={{ types: ['slide-drawer-down'] }}>
           <ClipboardList />
         </Link>
       </Button>
-      <div className="mx-auto flex w-full max-w-xl flex-col gap-4 p-4">
-        <h1 className="flex items-center justify-center gap-4 text-2xl">Tareas</h1>
-        <div className="flex flex-grow flex-col gap-2 overflow-y-scroll">
+      <div className="relative mx-auto flex w-full max-w-xl flex-col gap-4 py-4">
+        <div
+          aria-hidden
+          className="to-background pointer-events-none absolute top-0 bottom-0 left-0 z-10 w-4 bg-linear-to-l from-transparent"
+        />
+        <div
+          aria-hidden
+          className="to-background pointer-events-none absolute top-0 right-0 bottom-0 z-10 w-4 bg-linear-to-r from-transparent"
+        />
+        <h1 className="flex items-center justify-center gap-4 px-4 text-2xl">{m.tasks()}</h1>
+        <div className="flex flex-grow flex-col gap-2 overflow-x-hidden overflow-y-scroll px-4">
           {groupedTasks?.map((task) => (
-            <TaskItem key={task.uuid} task={task} remove={remove} />
+            <TaskItem
+              key={task.uuid}
+              task={task}
+              remove={remove}
+              subTaskAdd={creating?.parent ?? null}
+              setSubTaskAdd={(parent) => setCreating(parent === null ? null : { parent })}
+            />
           ))}
-          {isAdding ? (
-            <TaskItemCreation onCreation={() => setIsAdding(false)} onCancel={() => setIsAdding(false)} />
+          {creating !== null && creating.parent === undefined ? (
+            <TaskItemCreation onCreation={() => setCreating(null)} onCancel={() => setCreating(null)} />
           ) : (
-            <Button className="w-full" onClick={() => setIsAdding(true)}>
+            <Button aria-label={m.add_task()} className="w-full" onClick={() => setCreating({})}>
               <Plus />
             </Button>
           )}

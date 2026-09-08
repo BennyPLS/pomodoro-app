@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { HomeLayout } from '@/routes/-components/home-layout'
 import { BottomBar } from '@/routes/-components/bottom-bar'
 import { Timer } from '@/routes/-components/timer'
 import { TopBar } from '@/routes/-components/top-bar'
@@ -10,13 +11,14 @@ export const Route = createFileRoute('/')({
 
 function App() {
   return (
-    <div className="flex h-svh w-screen flex-col [view-transition-name:main-content]">
+    <>
       <FirstTimeVisitScript />
-      <TopBar />
-      <main className="flex grow items-center justify-center gap-4 py-4">
-        <Timer />
-      </main>
-      <BottomBar />
-    </div>
+      <HomeLayout
+        className="h-svh w-screen [view-transition-name:main-content]"
+        topBar={<TopBar />}
+        timer={<Timer />}
+        bottomBar={<BottomBar />}
+      />
+    </>
   )
 }
