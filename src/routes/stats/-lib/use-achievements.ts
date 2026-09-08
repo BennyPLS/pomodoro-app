@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import type { Session } from '@/lib/db'
-import { m } from '@/lib/i18n'
+import { m, useLocale } from '@/lib/i18n'
 
 export type FocusMilestoneDef = {
   id: string
@@ -89,7 +89,13 @@ const STREAK_DEFS = (): Array<StreakMilestoneDef> => [
 ]
 
 export function useAchievements(sessions: Array<Session> | null | undefined, streakDays: number) {
+  // Milestone titles come from the message catalog, so they have to be rebuilt
+  // when the locale changes.
+  const locale = useLocale()
+
   return useMemo(() => {
+    void locale
+
     const totalWorkSec = (sessions ?? []).reduce((acc, s) => (s.type === 'work' ? acc + s.duration : acc), 0)
     const completedPomodoros = (sessions ?? []).reduce((acc, s) => acc + (s.type === 'work' && s.completed ? 1 : 0), 0)
 
@@ -114,14 +120,18 @@ export function useAchievements(sessions: Array<Session> | null | undefined, str
       return { ...item, earned, progressPct, remainingDays }
     })
 
-    const nextStreak = streak.find((item) => !item.earned) ?? null
+    const groups = [focus, pomodoro, streak]
 
     return {
       totals: { totalWorkSec, completedPomodoros, streakDays },
       focus,
       pomodoro,
       streak,
-      nextStreak,
+      nextFocus: focus.find((item) => !item.earned) ?? null,
+      nextPomodoro: pomodoro.find((item) => !item.earned) ?? null,
+      nextStreak: streak.find((item) => !item.earned) ?? null,
+      earnedCount: groups.reduce((acc, group) => acc + group.filter((item) => item.earned).length, 0),
+      totalCount: groups.reduce((acc, group) => acc + group.length, 0),
     }
-  }, [sessions, streakDays])
+  }, [sessions, streakDays, locale])
 }
