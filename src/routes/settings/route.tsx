@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { Music2 } from 'lucide-react'
+import { AppUpdate } from '@/components/app-update'
 import { getLocale, m, setLocale } from '@/lib/i18n'
 import { isLocale } from '@/paraglide/runtime'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -50,6 +51,7 @@ function Page() {
           </Select>
         </section>
         <AppearanceSettings />
+        <AppUpdate settings />
         <section aria-labelledby="music-heading" className="bg-card overflow-hidden rounded-2xl border p-5 sm:p-7">
           <div className="mb-6 flex items-center gap-3">
             <div className="bg-primary/10 text-primary rounded-xl p-2.5">

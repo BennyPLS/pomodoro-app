@@ -201,5 +201,17 @@
   "color_chart_2": "Gráfico 2",
   "color_chart_3": "Gráfico 3",
   "color_chart_4": "Gráfico 4",
-  "color_chart_5": "Gráfico 5"
+  "color_chart_5": "Gráfico 5",
+  "app_updates": "Actualizaciones",
+  "update_available": "Actualización disponible",
+  "update_pause_timer": "Pausa el temporizador antes de actualizar. La actualización recarga la aplicación y reinicia el temporizador.",
+  "update_reload_hint": "La actualización recarga la aplicación y reinicia el temporizador. Las tareas y estadísticas guardadas se conservan.",
+  "update_error": "No se pudo buscar o instalar la actualización. Comprueba tu conexión e inténtalo de nuevo.",
+  "update_unavailable": "La búsqueda de actualizaciones no está disponible en este navegador o en modo de desarrollo.",
+  "update_checking": "Buscando actualizaciones…",
+  "update_current": "Tienes la última versión.",
+  "update_auto_hint": "Se buscan actualizaciones al volver a la aplicación y cada hora.",
+  "update_installing": "Actualizando…",
+  "update_now": "Actualizar ahora",
+  "check_updates": "Buscar actualizaciones"
 }

@@ -201,5 +201,17 @@
   "color_chart_2": "Chart 2",
   "color_chart_3": "Chart 3",
   "color_chart_4": "Chart 4",
-  "color_chart_5": "Chart 5"
+  "color_chart_5": "Chart 5",
+  "app_updates": "App updates",
+  "update_available": "Update available",
+  "update_pause_timer": "Pause the timer before updating. Updating reloads the app and resets the timer.",
+  "update_reload_hint": "Updating reloads the app and resets the timer. Saved tasks and statistics are kept.",
+  "update_error": "Could not check or install updates. Check your connection and try again.",
+  "update_unavailable": "Update checks are unavailable in this browser or development mode.",
+  "update_checking": "Checking for updates…",
+  "update_current": "You’re up to date.",
+  "update_auto_hint": "Updates are checked automatically when you return to the app and every hour.",
+  "update_installing": "Updating…",
+  "update_now": "Update now",
+  "check_updates": "Check for updates"
 }
