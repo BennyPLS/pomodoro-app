@@ -119,9 +119,6 @@
   "share_of_focus": "Share of total",
   "hours_table_caption": "Focus time for each hour of the day across the selected range.",
   "consistency": "Consistency",
-  "music": "Music",
-  "loading_music": "Loading music",
-  "no_music_hint": "Add your first track to accompany your sessions.",
   "appearance": "Appearance",
   "appearance_mode": "Appearance mode",
   "mode_light": "Light",
@@ -224,5 +221,16 @@
   "reset_data_confirm_description": "This permanently deletes your tasks, session statistics, uploaded music, custom themes and preferences stored in this browser, then reloads the app with the default settings. This cannot be undone.",
   "reset_data_confirm": "Delete everything",
   "reset_data_working": "Deleting…",
-  "reset_data_error": "Could not delete the local data. Close other tabs with the app open and try again."
+  "reset_data_error": "Could not delete the local data. Close other tabs with the app open and try again.",
+  "music_heading": "Music",
+  "music_description": "Make room for focus. Bring your own soundtrack.",
+  "smart_music_description": "Let your timer control music playback automatically.",
+  "music_library_description": "Preview your tracks and choose their playback order.",
+  "music_loading": "Loading music",
+  "music_empty_title": "Your focus soundtrack starts here",
+  "music_empty_description": "Add your favorite MP3 tracks to accompany your next session.",
+  "music_local_note": "MP3 files · Stored locally in this browser",
+  "music_remove": "Remove {title}",
+  "music_update_error": "Could not update your music. Please try again.",
+  "music_preview": "Preview"
 }

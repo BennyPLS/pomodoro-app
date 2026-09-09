@@ -1,29 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useLiveQuery } from 'dexie-react-hooks'
-import { ExternalLink, Music2 } from 'lucide-react'
+import { ExternalLink } from 'lucide-react'
 import { AppUpdate } from '@/components/app-update'
 import { Button } from '@/components/ui/button'
 import { getLocale, m, setLocale } from '@/lib/i18n'
 import { isLocale } from '@/paraglide/runtime'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Spinner } from '@/components/ui/spinner'
-import { Switch } from '@/components/ui/switch'
-import { useLocalStorageJson } from '@/hooks/use-local-storage'
-import db from '@/lib/db'
-import { AddMusicDialog } from '@/routes/settings/-components/add-music-dialog'
 import { AppearanceSettings } from '@/routes/settings/-components/appearance-settings'
-import { MusicItem } from '@/routes/settings/-components/music-item'
+import { MusicSettings } from '@/routes/settings/-components/music-settings'
 import { ResetDataDialog } from '@/routes/settings/-components/reset-data-dialog'
 import { TopBar } from '@/routes/settings/-components/top-bar'
 
 export const Route = createFileRoute('/settings')({ component: Page })
 
 function Page() {
-  const [automaticReproduction, setAutomaticReproduction] = useLocalStorageJson('pomodoro-smart-music', true)
-  const music = useLiveQuery(() => db.music.toArray().then((items) => items.sort((a, b) => a.order - b.order)))
-  const isLoading = music === undefined
-
   return (
     <div className="min-h-svh [view-transition-name:main-content]">
       <TopBar />
@@ -53,49 +43,7 @@ function Page() {
           </Select>
         </section>
         <AppearanceSettings />
-        <section aria-labelledby="music-heading" className="bg-card overflow-hidden rounded-2xl border p-5 sm:p-7">
-          <div className="mb-6 flex items-center gap-3">
-            <div className="bg-primary/10 text-primary rounded-xl p-2.5">
-              <Music2 className="size-5" />
-            </div>
-            <div>
-              <h2 id="music-heading" className="text-xl font-semibold">
-                {m.music()}
-              </h2>
-            </div>
-          </div>
-          <div className="flex items-center justify-between gap-4 border-b pb-6">
-            <div>
-              <Label htmlFor="smart-music">{m.smart_music()}</Label>
-            </div>
-            <Switch id="smart-music" checked={automaticReproduction} onCheckedChange={setAutomaticReproduction} />
-          </div>
-          <div className="flex items-center justify-between gap-4 py-5">
-            <h3 className="text-sm font-medium">{m.your_music()}</h3>
-            <AddMusicDialog isLoading={isLoading} />
-          </div>
-          <div className="flex flex-col gap-3 overflow-x-hidden">
-            {isLoading ? (
-              <div className="flex justify-center py-6" role="status" aria-label={m.loading_music()}>
-                <Spinner />
-              </div>
-            ) : music.length === 0 ? (
-              <p className="text-muted-foreground rounded-xl border border-dashed p-6 text-center text-sm">
-                {m.no_music_hint()}
-              </p>
-            ) : (
-              music.map((item, index) => (
-                <MusicItem
-                  music={item}
-                  key={item.title}
-                  isFirst={index === 0}
-                  isLast={index === music.length - 1}
-                  allMusic={music}
-                />
-              ))
-            )}
-          </div>
-        </section>
+        <MusicSettings />
         <AppUpdate settings />
         <section
           aria-labelledby="report-issue-heading"

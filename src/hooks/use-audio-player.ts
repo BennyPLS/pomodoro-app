@@ -1,13 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 
-interface AudioPlayerState {
-  isPlaying: boolean
-  currentTime: number
-  duration: number
-  volume: number
-  isMuted: boolean
-}
-
 interface AudioPlayerControls {
   play: () => void
   pause: () => void
@@ -17,16 +9,10 @@ interface AudioPlayerControls {
   toggleMute: () => void
 }
 
-export function useAudioPlayer(blob: Blob) {
+export function useAudioPlayer(blob: Blob, volume = 1) {
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
-  const [playerState, setPlayerState] = useState<AudioPlayerState>({
-    isPlaying: false,
-    currentTime: 0,
-    duration: 0,
-    volume: 1,
-    isMuted: false,
-  })
+  const [isPlaying, setIsPlaying] = useState(false)
 
   useEffect(() => {
     audioRef.current ??= new Audio()
@@ -35,18 +21,12 @@ export function useAudioPlayer(blob: Blob) {
     const url = URL.createObjectURL(blob)
     audio.src = url
 
+    // Previews only display play/pause state; progress stays on the audio element.
     const handlers = {
-      timeupdate: () => setPlayerState((prev) => ({ ...prev, currentTime: audio.currentTime })),
-      loadedmetadata: () => setPlayerState((prev) => ({ ...prev, duration: audio.duration })),
-      play: () => setPlayerState((prev) => ({ ...prev, isPlaying: true })),
-      pause: () => setPlayerState((prev) => ({ ...prev, isPlaying: false })),
-      ended: () => setPlayerState((prev) => ({ ...prev, isPlaying: false })),
-      volumechange: () =>
-        setPlayerState((prev) => ({
-          ...prev,
-          volume: audio.volume,
-          isMuted: audio.muted,
-        })),
+      loadstart: () => setIsPlaying(false),
+      play: () => setIsPlaying(true),
+      pause: () => setIsPlaying(false),
+      ended: () => setIsPlaying(false),
     }
 
     // Add all event listeners
@@ -65,12 +45,16 @@ export function useAudioPlayer(blob: Blob) {
     }
   }, [blob])
 
+  useEffect(() => {
+    if (audioRef.current) audioRef.current.volume = Math.min(1, Math.max(0, volume))
+  }, [volume])
+
   const controls: AudioPlayerControls = {
     play: () => void audioRef.current?.play(),
     pause: () => audioRef.current?.pause(),
     toggle: () => {
       if (!audioRef.current) return
-      if (playerState.isPlaying) {
+      if (!audioRef.current.paused) {
         audioRef.current.pause()
       } else {
         void audioRef.current.play()
@@ -80,9 +64,9 @@ export function useAudioPlayer(blob: Blob) {
       if (!audioRef.current) return
       audioRef.current.currentTime = time
     },
-    setVolume: (volume: number) => {
+    setVolume: (nextVolume: number) => {
       if (!audioRef.current) return
-      audioRef.current.volume = volume
+      audioRef.current.volume = nextVolume
     },
     toggleMute: () => {
       if (!audioRef.current) return
@@ -91,7 +75,7 @@ export function useAudioPlayer(blob: Blob) {
   }
 
   return {
-    ...playerState,
+    isPlaying,
     controls,
   }
 }

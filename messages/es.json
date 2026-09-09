@@ -119,9 +119,6 @@
   "share_of_focus": "Porcentaje del total",
   "hours_table_caption": "Tiempo de enfoque en cada hora del día durante el rango seleccionado.",
   "consistency": "Constancia",
-  "music": "Música",
-  "loading_music": "Cargando música",
-  "no_music_hint": "Añade tu primera canción para acompañar tus sesiones.",
   "appearance": "Apariencia",
   "appearance_mode": "Modo de apariencia",
   "mode_light": "Claro",
@@ -224,5 +221,16 @@
   "reset_data_confirm_description": "Se borrarán permanentemente tus tareas, estadísticas de sesiones, música subida, temas personalizados y preferencias guardadas en este navegador, y la aplicación se recargará con la configuración predeterminada. Esta acción no se puede deshacer.",
   "reset_data_confirm": "Borrar todo",
   "reset_data_working": "Borrando…",
-  "reset_data_error": "No se pudieron borrar los datos locales. Cierra otras pestañas con la aplicación abierta e inténtalo de nuevo."
+  "reset_data_error": "No se pudieron borrar los datos locales. Cierra otras pestañas con la aplicación abierta e inténtalo de nuevo.",
+  "music_heading": "Música",
+  "music_description": "Encuentra tu ritmo. Concéntrate con tu propia música.",
+  "smart_music_description": "Deja que el temporizador controle la música automáticamente.",
+  "music_library_description": "Escucha tus canciones y elige el orden de reproducción.",
+  "music_loading": "Cargando música",
+  "music_empty_title": "Tu música para concentrarte empieza aquí",
+  "music_empty_description": "Añade tus canciones MP3 favoritas para acompañar tu próxima sesión.",
+  "music_local_note": "Archivos MP3 · Guardados localmente en este navegador",
+  "music_remove": "Eliminar {title}",
+  "music_update_error": "No se pudo actualizar tu música. Inténtalo de nuevo.",
+  "music_preview": "Vista previa"
 }
