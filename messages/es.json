@@ -217,5 +217,12 @@
   "report_issue": "Informar de un problema",
   "report_issue_description": "¿Has encontrado un problema? Infórmanos en GitHub. Se abre en una pestaña nueva.",
   "suggest_feature": "Sugerir una función",
-  "suggest_feature_description": "¿Tienes una idea para mejorar la aplicación? Compártela en GitHub. Se abre en una pestaña nueva."
+  "suggest_feature_description": "¿Tienes una idea para mejorar la aplicación? Compártela en GitHub. Se abre en una pestaña nueva.",
+  "reset_data": "Restablecer datos",
+  "reset_data_description": "Borra todo lo guardado en este dispositivo y restaura los valores predeterminados.",
+  "reset_data_confirm_title": "¿Restablecer los datos de la aplicación?",
+  "reset_data_confirm_description": "Se borrarán permanentemente tus tareas, estadísticas de sesiones, música subida, temas personalizados y preferencias guardadas en este navegador, y la aplicación se recargará con la configuración predeterminada. Esta acción no se puede deshacer.",
+  "reset_data_confirm": "Borrar todo",
+  "reset_data_working": "Borrando…",
+  "reset_data_error": "No se pudieron borrar los datos locales. Cierra otras pestañas con la aplicación abierta e inténtalo de nuevo."
 }

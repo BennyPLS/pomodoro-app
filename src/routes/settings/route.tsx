@@ -14,6 +14,7 @@ import db from '@/lib/db'
 import { AddMusicDialog } from '@/routes/settings/-components/add-music-dialog'
 import { AppearanceSettings } from '@/routes/settings/-components/appearance-settings'
 import { MusicItem } from '@/routes/settings/-components/music-item'
+import { ResetDataDialog } from '@/routes/settings/-components/reset-data-dialog'
 import { TopBar } from '@/routes/settings/-components/top-bar'
 
 export const Route = createFileRoute('/settings')({ component: Page })
@@ -138,6 +139,7 @@ function Page() {
             </a>
           </Button>
         </section>
+        <ResetDataDialog />
       </main>
     </div>
   )

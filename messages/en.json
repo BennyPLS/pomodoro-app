@@ -217,5 +217,12 @@
   "report_issue": "Report an issue",
   "report_issue_description": "Found a problem? Report it on GitHub. Opens in a new tab.",
   "suggest_feature": "Suggest a feature",
-  "suggest_feature_description": "Have an idea to improve the app? Share it on GitHub. Opens in a new tab."
+  "suggest_feature_description": "Have an idea to improve the app? Share it on GitHub. Opens in a new tab.",
+  "reset_data": "Reset app data",
+  "reset_data_description": "Deletes everything stored on this device and restores the defaults.",
+  "reset_data_confirm_title": "Reset app data?",
+  "reset_data_confirm_description": "This permanently deletes your tasks, session statistics, uploaded music, custom themes and preferences stored in this browser, then reloads the app with the default settings. This cannot be undone.",
+  "reset_data_confirm": "Delete everything",
+  "reset_data_working": "Deleting…",
+  "reset_data_error": "Could not delete the local data. Close other tabs with the app open and try again."
 }

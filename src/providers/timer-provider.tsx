@@ -61,6 +61,7 @@ interface TimerActions {
   start: () => void
   stop: () => void
   reset: () => void
+  discard: () => void
 }
 
 type TimerStore = TimerState & TimerActions
@@ -238,6 +239,22 @@ function createTimerStore() {
       } else {
         set({ remainingSeconds: MODE_TIMES_SECONDS[individualMode] })
       }
+    },
+
+    // Drop the running phase without writing it to the database. Used when the
+    // user wipes local data, so neither this stop nor the pagehide handler can
+    // resurrect a session after the wipe.
+    discard: () => {
+      const { intervalId } = get()
+      if (intervalId !== null) clearInterval(intervalId)
+      set({
+        isRunning: false,
+        intervalId: null,
+        sessionStartAt: null,
+        sessionType: null,
+        sessionId: null,
+        sessionPlannedSeconds: null,
+      })
     },
 
     decrementSeconds: () => {
