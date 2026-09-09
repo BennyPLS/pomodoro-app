@@ -24,7 +24,7 @@ export default defineConfig({
     // (the v5 `babel` option was removed).
     viteReact({ compiler: true }),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       manifest: {
         name: 'Pomodoro App',
         short_name: 'Pomodoro',
@@ -61,6 +61,7 @@ export default defineConfig({
         prefer_related_applications: false,
       },
       workbox: {
+        clientsClaim: true,
         globPatterns: ['**/*'],
         maximumFileSizeToCacheInBytes: 30_000_000,
       },

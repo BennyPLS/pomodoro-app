@@ -1,5 +1,7 @@
 import { Suspense, lazy } from 'react'
 import { HeadContent, Outlet, Scripts, createRootRoute } from '@tanstack/react-router'
+import { AppUpdate } from '@/components/app-update'
+import { AppUpdateProvider } from '@/providers/app-update-provider'
 import { Toaster } from '@/components/ui/sonner'
 import { MusicPlayerProvider } from '@/providers/music-provider'
 import { ThemeProvider } from '@/providers/theme-provider'
@@ -20,8 +22,11 @@ export const Route = createRootRoute({
       <MusicPlayerProvider>
         <TimerProvider>
           <ThemeProvider>
-            <Toaster richColors={true} />
-            <LocalizedOutlet />
+            <AppUpdateProvider>
+              <Toaster richColors={true} />
+              <AppUpdate />
+              <LocalizedOutlet />
+            </AppUpdateProvider>
           </ThemeProvider>
         </TimerProvider>
       </MusicPlayerProvider>
