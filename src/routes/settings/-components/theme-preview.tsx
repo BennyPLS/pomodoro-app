@@ -3,6 +3,7 @@ import { BarChart, ChartBar, ClipboardList, Settings } from 'lucide-react'
 import type { ThemeColors } from '@/lib/themes'
 import type { IndividualMode, TimerMode } from '@/providers/timer-provider'
 import { themeStyle } from '@/lib/themes'
+import { m } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { HomeLayout } from '@/routes/-components/home-layout'
 import { TopBarView } from '@/routes/-components/top-bar'
@@ -62,7 +63,7 @@ export function ThemePreview({ colors, compact = false }: { colors: ThemeColors;
         aspectRatio: scale ? undefined : `${PREVIEW_WIDTH} / ${height}`,
       }}
       data-theme-preview={compact ? 'compact' : 'interactive'}
-      aria-label={compact ? undefined : 'Vista previa de inicio'}
+      aria-label={compact ? undefined : m.home_preview()}
       role={compact ? undefined : 'region'}
       aria-hidden={compact || undefined}
       inert={compact || undefined}
@@ -87,12 +88,12 @@ export function ThemePreview({ colors, compact = false }: { colors: ThemeColors;
                 setProgress(0)
               }}
               statsAction={
-                <Button size="icon" aria-label="Estadísticas (vista previa)" aria-disabled tabIndex={-1}>
+                <Button size="icon" aria-label={m.preview_label({ label: m.stats() })} aria-disabled tabIndex={-1}>
                   <BarChart />
                 </Button>
               }
               settingsAction={
-                <Button size="icon" aria-label="Configuración (vista previa)" aria-disabled tabIndex={-1}>
+                <Button size="icon" aria-label={m.preview_label({ label: m.settings() })} aria-disabled tabIndex={-1}>
                   <Settings />
                 </Button>
               }
@@ -133,7 +134,7 @@ export function ThemePreview({ colors, compact = false }: { colors: ThemeColors;
                   variant="outline"
                   size="icon"
                   className="border-muted-foreground/20 shadow-sm"
-                  aria-label="Estadísticas de la sesión (vista previa)"
+                  aria-label={m.preview_label({ label: m.session_stats() })}
                   aria-disabled
                   tabIndex={-1}
                 >
@@ -145,7 +146,7 @@ export function ThemePreview({ colors, compact = false }: { colors: ThemeColors;
                   variant="outline"
                   size="icon"
                   className="w-full rounded-none border-0 border-t"
-                  aria-label="Tareas (vista previa)"
+                  aria-label={m.preview_label({ label: m.tasks() })}
                   aria-disabled
                   tabIndex={-1}
                 >

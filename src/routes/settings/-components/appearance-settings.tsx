@@ -15,15 +15,16 @@ import {
 import type { ChangeEvent } from 'react'
 import type { Palette } from '@/lib/themes'
 import { PRESETS, parseThemeFile, serializeThemeFile } from '@/lib/themes'
+import { m } from '@/lib/i18n'
 import { useTheme } from '@/providers/theme-provider'
 import { Button } from '@/components/ui/button'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { ThemeEditor } from '@/routes/settings/-components/theme-editor'
 
 const MODES = [
-  { value: 'light', label: 'Claro', icon: Sun },
-  { value: 'dark', label: 'Oscuro', icon: Moon },
-  { value: 'system', label: 'Sistema', icon: Monitor },
+  { value: 'light', label: () => m.mode_light(), icon: Sun },
+  { value: 'dark', label: () => m.mode_dark(), icon: Moon },
+  { value: 'system', label: () => m.mode_system(), icon: Monitor },
 ] as const
 const PALETTE_COLORS = ['primary', 'accent', 'secondary'] as const
 
@@ -33,7 +34,7 @@ export function AppearanceSettings() {
   const [editor, setEditor] = useState<{ initial: Palette; editing: boolean } | null>(null)
   const create = (source: Palette) =>
     setEditor({
-      initial: { ...source, id: crypto.randomUUID(), name: `${source.name.slice(0, 30)} · copia` },
+      initial: { ...source, id: crypto.randomUUID(), name: m.theme_copy_name({ name: source.name.slice(0, 30) }) },
       editing: false,
     })
 
@@ -54,13 +55,13 @@ export function AppearanceSettings() {
         .replace(/[^a-z0-9]+/gi, '-')
         .replace(/^-|-$/g, '')
         .toLowerCase()
-      link.download = `${name || 'tema'}.json`
+      link.download = `${name || m.theme_file_fallback()}.json`
       document.body.append(link)
       link.click()
       link.remove()
       window.setTimeout(() => URL.revokeObjectURL(url), 1000)
     } catch {
-      setFileError('No se pudo exportar el tema. Inténtalo de nuevo.')
+      setFileError(m.theme_export_failed())
     }
   }
 
@@ -71,13 +72,12 @@ export function AppearanceSettings() {
     setFileError(null)
     setImporting(true)
     try {
-      if (customThemes.length >= 100)
-        throw new Error('Ya tienes 100 temas guardados. Elimina uno antes de importar otro.')
-      if (file.size > 1024 * 1024) throw new Error('El archivo es demasiado grande. El tamaño máximo es 1 MB.')
+      if (customThemes.length >= 100) throw new Error(m.theme_limit_reached())
+      if (file.size > 1024 * 1024) throw new Error(m.theme_file_too_large())
       const imported = parseThemeFile(await file.text())
       setEditor({ initial: { ...imported, id: crypto.randomUUID() }, editing: false })
     } catch (error) {
-      setFileError(error instanceof Error ? error.message : 'No se pudo leer el archivo.')
+      setFileError(error instanceof Error ? error.message : m.theme_file_unreadable())
     } finally {
       setImporting(false)
     }
@@ -91,15 +91,15 @@ export function AppearanceSettings() {
         </div>
         <div>
           <h2 id="appearance-heading" className="text-xl font-semibold">
-            Apariencia
+            {m.appearance()}
           </h2>
         </div>
       </div>
       <div className="flex flex-col justify-between gap-4 border-b pb-6 sm:flex-row sm:items-center">
         <div>
-          <h3 className="text-sm font-medium">Modo de apariencia</h3>
+          <h3 className="text-sm font-medium">{m.appearance_mode()}</h3>
         </div>
-        <div role="group" aria-label="Modo de apariencia" className="bg-muted flex shrink-0 gap-1 rounded-lg p-1">
+        <div role="group" aria-label={m.appearance_mode()} className="bg-muted flex shrink-0 gap-1 rounded-lg p-1">
           {MODES.map(({ value, label, icon: Icon }) => (
             <Button
               key={value}
@@ -110,15 +110,18 @@ export function AppearanceSettings() {
               onClick={() => setTheme(value)}
             >
               <Icon />
-              {label}
+              {label()}
             </Button>
           ))}
         </div>
       </div>
       <div className="mt-6 mb-4 flex flex-wrap items-center justify-between gap-2">
-        <h3 className="text-sm font-medium">Elige tu tema</h3>
+        <h3 className="text-sm font-medium">{m.choose_theme()}</h3>
         <span className="text-muted-foreground text-xs" role="status">
-          Actual: {palette.name} · {resolvedMode === 'light' ? 'Claro' : 'Oscuro'}
+          {m.current_theme({
+            name: palette.name,
+            mode: resolvedMode === 'light' ? m.mode_light() : m.mode_dark(),
+          })}
         </span>
       </div>
       <div className="mb-4 flex flex-wrap gap-2">
@@ -129,18 +132,23 @@ export function AppearanceSettings() {
           onClick={() => fileInput.current?.click()}
         >
           <Upload />
-          {importing ? 'Importando…' : 'Importar JSON'}
+          {importing ? m.importing() : m.import_json()}
         </Button>
-        <Button variant="outline" size="sm" onClick={() => exportTheme(palette)} title={`Exportar ${palette.name}`}>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => exportTheme(palette)}
+          title={m.export_theme_named({ name: palette.name })}
+        >
           <Download />
-          Exportar tema actual
+          {m.export_current_theme()}
         </Button>
         <input
           ref={fileInput}
           type="file"
           accept=".json,application/json"
           className="hidden"
-          aria-label="Archivo de tema JSON"
+          aria-label={m.theme_json_file()}
           onChange={importTheme}
         />
       </div>
@@ -157,7 +165,7 @@ export function AppearanceSettings() {
             <div key={item.id} className="relative min-w-0">
               <Button
                 variant="outline"
-                aria-label={`Aplicar tema ${item.name}`}
+                aria-label={m.apply_theme_named({ name: item.name })}
                 aria-pressed={selected}
                 onClick={() => selectPalette(item.id)}
                 className={`h-16.5 w-full min-w-0 justify-start gap-3 rounded-xl p-2 pr-12 shadow-none ${selected ? 'border-primary bg-primary/5 ring-primary/20 ring-2' : 'hover:border-primary/50'}`}
@@ -178,7 +186,7 @@ export function AppearanceSettings() {
                       variant="ghost"
                       size="icon"
                       className="absolute top-1/2 right-2 size-8 -translate-y-1/2"
-                      aria-label={`Opciones de ${item.name}`}
+                      aria-label={m.theme_options_named({ name: item.name })}
                     >
                       <MoreHorizontal />
                     </Button>
@@ -186,23 +194,23 @@ export function AppearanceSettings() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onSelect={() => setEditor({ initial: item, editing: true })}>
                       <Pencil />
-                      Editar
+                      {m.edit()}
                     </DropdownMenuItem>
 
                     <DropdownMenuItem disabled={customThemes.length >= 100} onSelect={() => create(item)}>
                       <Copy />
-                      Duplicar
+                      {m.duplicate()}
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => exportTheme(item)}>
                       <Download />
-                      Exportar JSON
+                      {m.export_json()}
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-destructive focus:text-destructive"
                       onSelect={() => deletePalette(item.id)}
                     >
                       <Trash2 />
-                      Eliminar
+                      {m.delete_theme()}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -211,8 +219,8 @@ export function AppearanceSettings() {
                   variant="ghost"
                   size="icon"
                   className="absolute top-1/2 right-2 size-8 -translate-y-1/2"
-                  aria-label={`Personalizar ${item.name}`}
-                  title={`Personalizar ${item.name}`}
+                  aria-label={m.customize_theme_named({ name: item.name })}
+                  title={m.customize_theme_named({ name: item.name })}
                   disabled={customThemes.length >= 100}
                   onClick={() => create(item)}
                 >
@@ -231,12 +239,12 @@ export function AppearanceSettings() {
           <span className="bg-muted flex size-12 shrink-0 items-center justify-center rounded-lg">
             <Plus className="size-5" />
           </span>
-          <span className="text-sm font-semibold">Crear tema</span>
+          <span className="text-sm font-semibold">{m.create_theme()}</span>
         </Button>
       </div>
       {storageError && (
         <p role="alert" className="text-destructive mt-2 text-sm">
-          No se pudo guardar la apariencia en este navegador. Los cambios se mantendrán solo durante esta sesión.
+          {m.theme_storage_error()}
         </p>
       )}
       {editor && <ThemeEditor initial={editor.initial} editing={editor.editing} onClose={() => setEditor(null)} />}

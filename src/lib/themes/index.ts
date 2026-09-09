@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { m } from '@/lib/i18n'
 
 export const COLOR_KEYS = [
   'background',
@@ -338,13 +339,11 @@ export function parseThemeFile(contents: string): Omit<Palette, 'id'> {
   try {
     data = JSON.parse(contents.replace(/^\uFEFF/, ''))
   } catch {
-    throw new Error('El archivo no contiene un JSON válido.')
+    throw new Error(m.theme_invalid_json())
   }
   const result = themeFileSchema.safeParse(data)
   if (!result.success) {
-    throw new Error(
-      'El archivo no es un tema compatible. Debe incluir un nombre y todos los colores de las variantes clara y oscura (versión 1).',
-    )
+    throw new Error(m.theme_incompatible_file())
   }
   return result.data.theme
 }

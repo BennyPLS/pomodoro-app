@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ChevronDown, RotateCcw } from 'lucide-react'
 import type { ColorKey, Palette, ResolvedMode, ThemeColors } from '@/lib/themes'
 import { COLOR_KEYS, PRESETS, contrastRatio, hexSchema, paletteSchema } from '@/lib/themes'
+import { m } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ColorPicker } from '@/components/ui/color-picker'
@@ -19,49 +20,44 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { useTheme } from '@/providers/theme-provider'
 import { ThemePreview } from '@/routes/settings/-components/theme-preview'
 
-const MAIN_COLORS: Array<[ColorKey, string]> = [
-  ['background', 'Fondo'],
-  ['card', 'Superficie'],
-  ['foreground', 'Texto'],
-  ['primary', 'Principal'],
-  ['accent', 'Acento'],
-  ['border', 'Bordes'],
-]
-const LABELS: Record<ColorKey, string> = {
-  background: 'Fondo',
-  foreground: 'Texto',
-  card: 'Superficie',
-  'card-foreground': 'Texto de superficie',
-  popover: 'Menús',
-  'popover-foreground': 'Texto de menús',
-  primary: 'Principal',
-  'primary-foreground': 'Texto sobre principal',
-  secondary: 'Secundario',
-  'secondary-foreground': 'Texto sobre secundario',
-  muted: 'Fondo sutil',
-  'muted-foreground': 'Texto secundario',
-  accent: 'Acento',
-  'accent-foreground': 'Texto sobre acento',
-  destructive: 'Error',
-  'destructive-foreground': 'Texto de error',
-  border: 'Bordes',
-  input: 'Bordes de campos',
-  ring: 'Indicador de foco',
-  'chart-1': 'Gráfico 1',
-  'chart-2': 'Gráfico 2',
-  'chart-3': 'Gráfico 3',
-  'chart-4': 'Gráfico 4',
-  'chart-5': 'Gráfico 5',
+const MAIN_COLORS: Array<ColorKey> = ['background', 'card', 'foreground', 'primary', 'accent', 'border']
+// Label getters, not strings: messages have to be read on every render so switching
+// the locale relabels the editor.
+const LABELS: Record<ColorKey, () => string> = {
+  background: () => m.color_background(),
+  foreground: () => m.color_foreground(),
+  card: () => m.color_card(),
+  'card-foreground': () => m.color_card_foreground(),
+  popover: () => m.color_popover(),
+  'popover-foreground': () => m.color_popover_foreground(),
+  primary: () => m.color_primary(),
+  'primary-foreground': () => m.color_primary_foreground(),
+  secondary: () => m.color_secondary(),
+  'secondary-foreground': () => m.color_secondary_foreground(),
+  muted: () => m.color_muted(),
+  'muted-foreground': () => m.color_muted_foreground(),
+  accent: () => m.color_accent(),
+  'accent-foreground': () => m.color_accent_foreground(),
+  destructive: () => m.color_destructive(),
+  'destructive-foreground': () => m.color_destructive_foreground(),
+  border: () => m.color_border(),
+  input: () => m.color_input(),
+  ring: () => m.color_ring(),
+  'chart-1': () => m.color_chart_1(),
+  'chart-2': () => m.color_chart_2(),
+  'chart-3': () => m.color_chart_3(),
+  'chart-4': () => m.color_chart_4(),
+  'chart-5': () => m.color_chart_5(),
 }
-const PAIRS: Array<[ColorKey, ColorKey, string]> = [
-  ['foreground', 'background', 'Texto'],
-  ['card-foreground', 'card', 'Superficies'],
-  ['primary-foreground', 'primary', 'Botones'],
-  ['muted-foreground', 'muted', 'Texto secundario'],
-  ['accent-foreground', 'accent', 'Acento'],
-  ['secondary-foreground', 'secondary', 'Secundario'],
-  ['popover-foreground', 'popover', 'Menús'],
-  ['destructive-foreground', 'destructive', 'Error'],
+const PAIRS: Array<[ColorKey, ColorKey, () => string]> = [
+  ['foreground', 'background', () => m.color_foreground()],
+  ['card-foreground', 'card', () => m.contrast_surfaces()],
+  ['primary-foreground', 'primary', () => m.contrast_buttons()],
+  ['muted-foreground', 'muted', () => m.color_muted_foreground()],
+  ['accent-foreground', 'accent', () => m.color_accent()],
+  ['secondary-foreground', 'secondary', () => m.color_secondary()],
+  ['popover-foreground', 'popover', () => m.color_popover()],
+  ['destructive-foreground', 'destructive', () => m.color_destructive()],
 ]
 
 export function ThemeEditor({
@@ -86,7 +82,7 @@ export function ThemeEditor({
     ]),
   ) as ThemeColors
   const contrast = PAIRS.map(([text, background, label]) => ({
-    label,
+    label: label(),
     ratio: contrastRatio(colors[text], colors[background]),
   }))
   const lowContrast = contrast.filter((pair) => pair.ratio < 4.5)
@@ -116,7 +112,7 @@ export function ThemeEditor({
         </div>
         {invalid && (
           <p id={`${id}-error`} className="text-destructive text-xs">
-            Usa un color como #a4cea0.
+            {m.hex_hint()}
           </p>
         )}
       </div>
@@ -132,10 +128,8 @@ export function ThemeEditor({
     >
       <DialogContent className="max-h-[90svh] overflow-y-auto sm:max-w-5xl">
         <div className="pr-8">
-          <DialogTitle>{editing ? 'Editar tema' : 'Crear tema'}</DialogTitle>
-          <DialogDescription className="mt-2">
-            Dale tu toque a cada sesión. Los cambios se aplican al guardar.
-          </DialogDescription>
+          <DialogTitle>{editing ? m.edit_theme() : m.create_theme()}</DialogTitle>
+          <DialogDescription className="mt-2">{m.theme_editor_description()}</DialogDescription>
         </div>
         <form
           onSubmit={(event) => {
@@ -149,22 +143,22 @@ export function ThemeEditor({
           <div className="grid gap-6 md:grid-cols-[1fr_360px]">
             <div className="min-w-0 space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="theme-name">Nombre del tema</Label>
+                <Label htmlFor="theme-name">{m.theme_name()}</Label>
                 <Input
                   id="theme-name"
                   value={draft.name}
                   onChange={(event) => setDraft({ ...draft, name: event.target.value })}
                   maxLength={40}
                   required
-                  placeholder="Mi rincón de calma"
+                  placeholder={m.theme_name_placeholder()}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="theme-base">Empezar desde un preset</Label>
+                <Label htmlFor="theme-base">{m.start_from_preset()}</Label>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button id="theme-base" variant="outline" className="w-full justify-between font-normal">
-                      {PRESETS.find((preset) => preset.id === baseId)?.name ?? 'Colores del tema original'}
+                      {PRESETS.find((preset) => preset.id === baseId)?.name ?? m.original_theme_colors()}
                       <ChevronDown />
                     </Button>
                   </DropdownMenuTrigger>
@@ -188,10 +182,10 @@ export function ThemeEditor({
                     </DropdownMenuRadioGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <p className="text-muted-foreground text-xs">Reemplaza los colores de las dos variantes.</p>
+                <p className="text-muted-foreground text-xs">{m.preset_replaces_variants()}</p>
               </div>
               <FieldSet className="gap-0">
-                <FieldLegend variant="label">Variante que estás editando</FieldLegend>
+                <FieldLegend variant="label">{m.editing_variant()}</FieldLegend>
                 <div className="bg-muted flex gap-1 rounded-lg p-1">
                   {(['light', 'dark'] as const).map((item) => (
                     <Button
@@ -201,65 +195,55 @@ export function ThemeEditor({
                       aria-pressed={mode === item}
                       onClick={() => setMode(item)}
                     >
-                      {item === 'light' ? 'Clara' : 'Oscura'}
+                      {item === 'light' ? m.variant_light() : m.variant_dark()}
                     </Button>
                   ))}
                 </div>
               </FieldSet>
-              <div className="grid grid-cols-2 gap-4">{MAIN_COLORS.map(([key, label]) => field(key, label))}</div>
-              <ExpandableCard title="Colores avanzados">
+              <div className="grid grid-cols-2 gap-4">{MAIN_COLORS.map((key) => field(key, LABELS[key]()))}</div>
+              <ExpandableCard title={m.advanced_colors()}>
                 <div className="mt-4 grid grid-cols-2 gap-4">
-                  {COLOR_KEYS.filter((key) => !MAIN_COLORS.some(([main]) => main === key)).map((key) =>
-                    field(key, LABELS[key]),
-                  )}
+                  {COLOR_KEYS.filter((key) => !MAIN_COLORS.includes(key)).map((key) => field(key, LABELS[key]()))}
                 </div>
               </ExpandableCard>
               <Button variant="ghost" size="sm" onClick={() => setDraft({ ...draft, [mode]: { ...baseline[mode] } })}>
-                <RotateCcw /> Restablecer variante {mode === 'light' ? 'clara' : 'oscura'}
+                <RotateCcw /> {mode === 'light' ? m.reset_light_variant() : m.reset_dark_variant()}
               </Button>
             </div>
             <aside className="min-w-0">
               <div className="space-y-3 md:sticky md:top-0">
                 <p className="text-muted-foreground text-xs font-medium tracking-widest uppercase">
-                  Inicio · {mode === 'light' ? 'Clara' : 'Oscura'}
+                  {m.preview_home_variant({ variant: mode === 'light' ? m.variant_light() : m.variant_dark() })}
                 </p>
-                <p className="text-muted-foreground text-xs">
-                  Prueba el temporizador y los controles de inicio con tus colores.
-                </p>
+                <p className="text-muted-foreground text-xs">{m.theme_preview_hint()}</p>
                 <ThemePreview colors={colors} />
                 <ExpandableCard
                   title={
-                    lowContrast.length
-                      ? `${lowContrast.length} combinaciones con contraste bajo`
-                      : 'Buen contraste de texto'
+                    lowContrast.length ? m.low_contrast_count({ count: lowContrast.length }) : m.good_text_contrast()
                   }
                 >
-                  <p className="text-muted-foreground mt-2">
-                    Referencia para texto normal: 4.5:1. Puedes guardar y seguir ajustando.
-                  </p>
+                  <p className="text-muted-foreground mt-2">{m.contrast_reference()}</p>
                   <ul className="mt-2 space-y-1">
                     {contrast.map((pair) => (
                       <li key={pair.label} className="flex justify-between gap-2">
                         <span>{pair.label}</span>
                         <span>
-                          {pair.ratio.toFixed(2)}:1 {pair.ratio < 4.5 ? '· Revisar' : '· OK'}
+                          {pair.ratio.toFixed(2)}:1 {pair.ratio < 4.5 ? m.contrast_review() : m.contrast_ok()}
                         </span>
                       </li>
                     ))}
                   </ul>
                 </ExpandableCard>
-                <p className="text-muted-foreground text-xs">
-                  Cada tema incluye una variante clara y otra oscura. Personaliza ambas antes de guardar.
-                </p>
+                <p className="text-muted-foreground text-xs">{m.theme_variants_note()}</p>
               </div>
             </aside>
           </div>
           <div className="mt-6 flex flex-wrap justify-end gap-2 border-t pt-4">
             <Button variant="outline" onClick={onClose}>
-              Cancelar
+              {m.cancel()}
             </Button>
             <Button type="submit" disabled={!valid}>
-              Guardar y aplicar
+              {m.save_and_apply()}
             </Button>
           </div>
         </form>

@@ -57,7 +57,7 @@ function Page() {
             </div>
             <div>
               <h2 id="music-heading" className="text-xl font-semibold">
-                Música
+                {m.music()}
               </h2>
             </div>
           </div>
@@ -73,12 +73,12 @@ function Page() {
           </div>
           <div className="flex flex-col gap-3 overflow-x-hidden">
             {isLoading ? (
-              <div className="flex justify-center py-6" role="status" aria-label="Cargando música">
+              <div className="flex justify-center py-6" role="status" aria-label={m.loading_music()}>
                 <Spinner />
               </div>
             ) : music.length === 0 ? (
               <p className="text-muted-foreground rounded-xl border border-dashed p-6 text-center text-sm">
-                Añade tu primera canción para acompañar tus sesiones.
+                {m.no_music_hint()}
               </p>
             ) : (
               music.map((item, index) => (
