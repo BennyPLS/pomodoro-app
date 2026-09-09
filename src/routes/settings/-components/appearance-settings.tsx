@@ -70,14 +70,20 @@ export function AppearanceSettings() {
     event.currentTarget.value = ''
     if (!file) return
     setFileError(null)
+    if (customThemes.length >= 100) {
+      setFileError(m.theme_limit_reached())
+      return
+    }
+    if (file.size > 1024 * 1024) {
+      setFileError(m.theme_file_too_large())
+      return
+    }
     setImporting(true)
     try {
-      if (customThemes.length >= 100) throw new Error(m.theme_limit_reached())
-      if (file.size > 1024 * 1024) throw new Error(m.theme_file_too_large())
       const imported = parseThemeFile(await file.text())
       setEditor({ initial: { ...imported, id: crypto.randomUUID() }, editing: false })
-    } catch (error) {
-      setFileError(error instanceof Error ? error.message : m.theme_file_unreadable())
+    } catch {
+      setFileError(m.theme_file_unreadable())
     } finally {
       setImporting(false)
     }
