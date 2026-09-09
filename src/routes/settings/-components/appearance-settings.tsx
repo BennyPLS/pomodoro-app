@@ -211,10 +211,7 @@ export function AppearanceSettings() {
                       <Download />
                       {m.export_json()}
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="text-destructive focus:text-destructive"
-                      onSelect={() => deletePalette(item.id)}
-                    >
+                    <DropdownMenuItem className="text-destructive" onSelect={() => deletePalette(item.id)}>
                       <Trash2 />
                       {m.delete_theme()}
                     </DropdownMenuItem>
