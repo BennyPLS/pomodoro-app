@@ -213,5 +213,9 @@
   "update_auto_hint": "Se buscan actualizaciones al volver a la aplicación y cada hora.",
   "update_installing": "Actualizando…",
   "update_now": "Actualizar ahora",
-  "check_updates": "Buscar actualizaciones"
+  "check_updates": "Buscar actualizaciones",
+  "report_issue": "Informar de un problema",
+  "report_issue_description": "¿Has encontrado un problema? Infórmanos en GitHub. Se abre en una pestaña nueva.",
+  "suggest_feature": "Sugerir una función",
+  "suggest_feature_description": "¿Tienes una idea para mejorar la aplicación? Compártela en GitHub. Se abre en una pestaña nueva."
 }

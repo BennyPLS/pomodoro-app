@@ -1,0 +1,34 @@
+name: Feature suggestion
+description: Suggest a new feature or an improvement to the Pomodoro app.
+title: 'Feature request: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for sharing your idea! Please search existing issues before submitting.
+        You can write your suggestion in English or Spanish.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What would this help you do?
+      description: Describe the need or problem behind your suggestion.
+      placeholder: When I use the app to…, I would like to…
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Your suggestion
+      description: Describe the feature and how you would like it to work.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optionally describe other ways to solve this problem or any workaround you use today.
+  - type: textarea
+    id: context
+    attributes:
+      label: Examples or additional details
+      description: Optionally add screenshots, sketches, or examples that illustrate your idea.

@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useLiveQuery } from 'dexie-react-hooks'
-import { Music2 } from 'lucide-react'
+import { ExternalLink, Music2 } from 'lucide-react'
 import { AppUpdate } from '@/components/app-update'
+import { Button } from '@/components/ui/button'
 import { getLocale, m, setLocale } from '@/lib/i18n'
 import { isLocale } from '@/paraglide/runtime'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -95,6 +96,48 @@ function Page() {
           </div>
         </section>
         <AppUpdate settings />
+        <section
+          aria-labelledby="report-issue-heading"
+          className="bg-card flex flex-wrap items-center justify-between gap-4 rounded-2xl border p-5 sm:p-7"
+        >
+          <div>
+            <h2 id="report-issue-heading" className="font-semibold">
+              {m.report_issue()}
+            </h2>
+            <p className="text-muted-foreground text-sm">{m.report_issue_description()}</p>
+          </div>
+          <Button variant="outline" asChild>
+            <a
+              href="https://github.com/BennyPLS/pomodoro-app/issues/new?template=bug_report.yml"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {m.report_issue()}
+              <ExternalLink aria-hidden="true" />
+            </a>
+          </Button>
+        </section>
+        <section
+          aria-labelledby="suggest-feature-heading"
+          className="bg-card flex flex-wrap items-center justify-between gap-4 rounded-2xl border p-5 sm:p-7"
+        >
+          <div>
+            <h2 id="suggest-feature-heading" className="font-semibold">
+              {m.suggest_feature()}
+            </h2>
+            <p className="text-muted-foreground text-sm">{m.suggest_feature_description()}</p>
+          </div>
+          <Button variant="outline" asChild>
+            <a
+              href="https://github.com/BennyPLS/pomodoro-app/issues/new?template=feature_request.yml"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {m.suggest_feature()}
+              <ExternalLink aria-hidden="true" />
+            </a>
+          </Button>
+        </section>
       </main>
     </div>
   )

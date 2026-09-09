@@ -1,0 +1,52 @@
+name: Bug report
+description: Report a problem with the Pomodoro app.
+title: 'Bug: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve the app! Please search existing issues before submitting.
+        You can write your report in English or Spanish.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the problem and what you expected to happen instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Explain how to trigger the problem.
+      placeholder: |
+        1. Open the app
+        2. Go to…
+        3. Click…
+        4. The problem occurs
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Device and browser
+      description: Include your operating system and browser version if you know them.
+      placeholder: Android phone with Chrome, Windows 11 with Firefox, etc.
+    validations:
+      required: true
+  - type: dropdown
+    id: app-mode
+    attributes:
+      label: How are you using the app?
+      options:
+        - Browser tab
+        - Installed app (PWA)
+        - Both
+        - Not sure
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Screenshots or additional details
+      description: Optionally attach screenshots or share anything else that helps explain the problem.

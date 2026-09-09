@@ -213,5 +213,9 @@
   "update_auto_hint": "Updates are checked automatically when you return to the app and every hour.",
   "update_installing": "Updating…",
   "update_now": "Update now",
-  "check_updates": "Check for updates"
+  "check_updates": "Check for updates",
+  "report_issue": "Report an issue",
+  "report_issue_description": "Found a problem? Report it on GitHub. Opens in a new tab.",
+  "suggest_feature": "Suggest a feature",
+  "suggest_feature_description": "Have an idea to improve the app? Share it on GitHub. Opens in a new tab."
 }
