@@ -51,7 +51,6 @@ function Page() {
           </Select>
         </section>
         <AppearanceSettings />
-        <AppUpdate settings />
         <section aria-labelledby="music-heading" className="bg-card overflow-hidden rounded-2xl border p-5 sm:p-7">
           <div className="mb-6 flex items-center gap-3">
             <div className="bg-primary/10 text-primary rounded-xl p-2.5">
@@ -95,6 +94,7 @@ function Page() {
             )}
           </div>
         </section>
+        <AppUpdate settings />
       </main>
     </div>
   )
