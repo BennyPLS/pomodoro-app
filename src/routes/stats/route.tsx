@@ -33,9 +33,9 @@ function Page() {
   const isLoading = sessions === undefined
 
   return (
-    <div className="flex h-svh w-screen flex-col [view-transition-name:main-content]">
+    <div className="flex h-svh w-full flex-col overflow-hidden [view-transition-name:main-content]">
       <TopBar />
-      <main className="min-h-0 grow overflow-y-auto">
+      <main className="relative min-h-0 grow overflow-y-auto">
         <div className="container mx-auto flex flex-col gap-6 px-4 py-4 sm:px-6 sm:py-6">
           {isLoading ? (
             <div className="flex justify-center py-16">
