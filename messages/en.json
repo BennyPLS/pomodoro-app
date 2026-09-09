@@ -118,5 +118,16 @@
   "hour": "Hour",
   "share_of_focus": "Share of total",
   "hours_table_caption": "Focus time for each hour of the day across the selected range.",
-  "consistency": "Consistency"
+  "consistency": "Consistency",
+  "music_heading": "Music",
+  "music_description": "Make room for focus. Bring your own soundtrack.",
+  "smart_music_description": "Let your timer control music playback automatically.",
+  "music_library_description": "Preview your tracks and choose their playback order.",
+  "music_loading": "Loading music",
+  "music_empty_title": "Your focus soundtrack starts here",
+  "music_empty_description": "Add your favorite MP3 tracks to accompany your next session.",
+  "music_local_note": "MP3 files · Stored locally in this browser",
+  "music_remove": "Remove {title}",
+  "music_update_error": "Could not update your music. Please try again.",
+  "music_preview": "Preview"
 }

@@ -118,5 +118,16 @@
   "hour": "Hora",
   "share_of_focus": "Porcentaje del total",
   "hours_table_caption": "Tiempo de enfoque en cada hora del día durante el rango seleccionado.",
-  "consistency": "Constancia"
+  "consistency": "Constancia",
+  "music_heading": "Música",
+  "music_description": "Encuentra tu ritmo. Concéntrate con tu propia música.",
+  "smart_music_description": "Deja que el temporizador controle la música automáticamente.",
+  "music_library_description": "Escucha tus canciones y elige el orden de reproducción.",
+  "music_loading": "Cargando música",
+  "music_empty_title": "Tu música para concentrarte empieza aquí",
+  "music_empty_description": "Añade tus canciones MP3 favoritas para acompañar tu próxima sesión.",
+  "music_local_note": "Archivos MP3 · Guardados localmente en este navegador",
+  "music_remove": "Eliminar {title}",
+  "music_update_error": "No se pudo actualizar tu música. Inténtalo de nuevo.",
+  "music_preview": "Vista previa"
 }

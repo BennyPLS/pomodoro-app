@@ -1,12 +1,12 @@
-import { ArrowDown, ArrowUp, Pause, Play } from 'lucide-react'
-import { useMemo } from 'react'
-import { motion, useAnimate } from 'motion/react'
+import { ArrowDown, ArrowUp, Pause, Play, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { toast } from 'sonner'
 import type { Music } from '@/lib/db'
-import type { PanInfo } from 'motion'
 import { m } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import { useAudioPlayer } from '@/hooks/use-audio-player'
 import db from '@/lib/db'
+import { useMusicPlayer } from '@/providers/music-provider'
 
 interface MusicItemProps {
   music: Music
@@ -15,91 +15,94 @@ interface MusicItemProps {
   allMusic: Array<Music>
 }
 
-export function MusicItem({ music: { blob, title, order }, isFirst, isLast, allMusic }: MusicItemProps) {
-  const { controls, isPlaying } = useAudioPlayer(blob)
-  const [scope, animate] = useAnimate()
+export function MusicItem({ music: { blob, title }, isFirst, isLast, allMusic }: MusicItemProps) {
+  const volume = useMusicPlayer((store) => store.volume)
+  const { controls, isPlaying } = useAudioPlayer(blob, volume)
+  const [pending, setPending] = useState(false)
+  const index = allMusic.findIndex((item) => item.title === title)
 
-  const PlayPauseIcon = useMemo(() => (isPlaying ? Pause : Play), [isPlaying])
-
-  const moveUp = async () => {
-    if (isFirst) return
-
-    // Find the item above this one
-    const itemAbove = allMusic.find((item) => item.order === order - 1)
-    if (!itemAbove) return
-
-    // Swap the orders
-    await db.music.update(title, { order: order - 1 })
-    await db.music.update(itemAbove.title, { order: order })
-  }
-
-  const moveDown = async () => {
-    if (isLast) return
-
-    // Find the item below this one
-    const itemBelow = allMusic.find((item) => item.order === order + 1)
-    if (!itemBelow) return
-
-    // Swap the orders
-    await db.music.update(title, { order: order + 1 })
-    await db.music.update(itemBelow.title, { order: order })
-  }
-
-  const removeItem = async () => {
-    await db.music.delete(title)
-
-    // Update the order of items after this one
-    const itemsAfter = allMusic.filter((item) => item.order > order)
-    for (const item of itemsAfter) {
-      await db.music.update(item.title, {
-        order: item.order - 1,
+  const updateMusic = async (direction: -1 | 1 | 'remove') => {
+    setPending(true)
+    try {
+      await db.transaction('rw', db.music, async () => {
+        const items = await db.music.orderBy('order').toArray()
+        const current = items.findIndex((item) => item.title === title)
+        if (current < 0) return
+        if (direction === 'remove') {
+          await db.music.delete(title)
+          items.splice(current, 1)
+        } else {
+          const next = current + direction
+          if (next < 0 || next >= items.length) return
+          ;[items[current], items[next]] = [items[next], items[current]]
+        }
+        await Promise.all(items.map((item, position) => db.music.update(item.title, { order: position + 1 })))
       })
-    }
-  }
-
-  const handleDragEnd = (_event: never, info: PanInfo) => {
-    const offset = info.offset.x
-    const velocity = info.velocity.x
-
-    if (offset > 100 || velocity > 500) {
-      // swipe right to delete
-      animate(scope.current, { x: '100%' }, { duration: 0.2 })
-      setTimeout(async () => await removeItem(), 200)
-    } else {
-      animate(scope.current, { x: 0, opacity: 1 }, { duration: 0.5 })
+    } catch {
+      toast.error(m.music_update_error())
+    } finally {
+      setPending(false)
     }
   }
 
   return (
-    <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }}>
-      <motion.div
-        className="bg-card flex items-center gap-3 rounded border p-3"
-        drag="x"
-        ref={scope}
-        dragConstraints={{ top: 0, bottom: 0, left: 0 }}
-        whileDrag={{ cursor: 'grabbing' }}
-        onDragEnd={handleDragEnd}
+    <li
+      className={`flex items-center gap-3 p-3 transition-colors sm:gap-4 sm:p-4 ${isPlaying ? 'bg-primary/5' : 'hover:bg-muted/30'}`}
+    >
+      <span className="text-muted-foreground hidden w-5 shrink-0 text-center text-xs tabular-nums sm:block">
+        {String(index + 1).padStart(2, '0')}
+      </span>
+      <Button
+        size="icon"
+        variant={isPlaying ? 'default' : 'secondary'}
+        className="size-10 shrink-0 rounded-full"
+        aria-label={`${isPlaying ? m.pause_music() : m.play_music()}: ${title}`}
+        onClick={controls.toggle}
       >
-        <Button
-          size="icon"
-          variant="outline"
-          aria-label={isPlaying ? m.pause_music() : m.play_music()}
-          onClick={() => controls.toggle()}
-        >
-          <PlayPauseIcon />
-        </Button>
-
-        <h2 className="truncate text-base font-semibold">{title}</h2>
-
-        <div className="ml-auto flex gap-2">
-          <Button size="icon" variant="outline" aria-label={m.move_up()} onClick={moveUp} disabled={isFirst}>
-            <ArrowUp className="h-4 w-4" />
+        {isPlaying ? <Pause className="size-4" /> : <Play className="size-4" />}
+      </Button>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-medium" title={title}>
+          {title}
+        </p>
+        <p className="text-muted-foreground mt-1 text-xs">
+          {isPlaying ? m.music_preview() : 'MP3'} · {(blob.size / 1024 / 1024).toFixed(1)} MB
+        </p>
+      </div>
+      <div className="flex shrink-0 items-center gap-0.5">
+        <div className="flex flex-col sm:flex-row">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            aria-label={`${m.move_up()}: ${title}`}
+            onClick={() => void updateMusic(-1)}
+            disabled={isFirst || pending}
+          >
+            <ArrowUp className="size-4" />
           </Button>
-          <Button size="icon" variant="outline" aria-label={m.move_down()} onClick={moveDown} disabled={isLast}>
-            <ArrowDown className="h-4 w-4" />
+          <Button
+            size="icon"
+            variant="ghost"
+            className="size-8"
+            aria-label={`${m.move_down()}: ${title}`}
+            onClick={() => void updateMusic(1)}
+            disabled={isLast || pending}
+          >
+            <ArrowDown className="size-4" />
           </Button>
         </div>
-      </motion.div>
-    </motion.div>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="text-muted-foreground hover:text-destructive size-8"
+          aria-label={m.music_remove({ title })}
+          onClick={() => void updateMusic('remove')}
+          disabled={pending}
+        >
+          <Trash2 className="size-4" />
+        </Button>
+      </div>
+    </li>
   )
 }
