@@ -214,10 +214,10 @@ export function TimerView({
           {formattedAccessibleTime}
         </p>
 
-        <div className="relative flex h-50 overflow-hidden py-10 text-center text-9xl" aria-hidden="true">
-          {/* Fades */}
-          <div className="to-background/0 from-background pointer-events-none absolute inset-x-0 top-0 z-10 h-10 bg-linear-to-b" />
-
+        <div
+          className="relative flex h-50 overflow-hidden mask-[linear-gradient(to_bottom,transparent,black_2.5rem,black_calc(100%-2.5rem),transparent)] py-10 text-center text-9xl"
+          aria-hidden="true"
+        >
           {/* Digits */}
           {/* Note: The 'style' is now controlled by the Visual Update Effect */}
           <div className="relative h-30 w-20">
@@ -273,8 +273,6 @@ export function TimerView({
               ))}
             </div>
           </div>
-
-          <div className="from-background/0 to-background pointer-events-none absolute inset-x-0 bottom-0 z-10 h-10 bg-linear-to-b" />
         </div>
       </div>
 
